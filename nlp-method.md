@@ -15,10 +15,10 @@ mera sir dukh raha hai
 - **translate it**<br>
 my head is aching
 - **tokenise the input**<br>
-my    --> x
-head  --> head
-is    --> x
-aching--> ache
+my    --> x<br>
+head  --> head<br>
+is    --> x<br>
+aching--> ache<br>
 
 - **compare to symptoms**<br>
 headache - 0.9,
