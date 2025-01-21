@@ -4,6 +4,35 @@ import re
 from proscessInp import getSymptoms as gs
 
 DEBUG=True
+DEBUG=False
+
+def ask_severity_questions(symptom):
+    print(f"On a scale of 1 to 10, how severe is your {symptom.lower()}?")
+    severity = input("You: ").strip()
+    print(f"Chatbot: Thank you for sharing. ({severity})")
+
+    print(f"Chatbot: How frequently do you experience {symptom.lower()}? (e.g., occasionally, daily, constantly)")
+    frequency = input("You: ").strip()
+    print(f"Chatbot: Thank you for sharing. ({frequency})")
+
+    print(f"Chatbot: When did your {symptom.lower()} start? (e.g., 2 days ago, 1 week ago)")
+    duration = input("You: ").strip()
+    print(f"Chatbot: Thank you for sharing. ({duration})")
+
+    print("Are you currently on any medications or supplements?")
+    ongoing_medications = input("You: ").strip()
+    print(f"ChatbotChatbot: Thank you for sharing. ({ongoing_medications})")
+
+    print(f"Does anyone in your family have a history of {symptom.lower()} or related conditions?")
+    family_history = input("You :").strip()
+    print(f"ChatbotChatbot: Thank you for sharing. ({family_history})")
+    return {
+                "severity": severity,   # make sure all of these are strings
+                "frequency": frequency,
+                "duration": duration,
+                "ongoing medications": ongoing_medications,
+                "family history": family_history
+           }
 
 def translate_english(text):
     url = "https://deep-translator-api.azurewebsites.net/google/"
@@ -30,7 +59,11 @@ if __name__ == '__main__':
         else:
             print(prsdInp)
             exit()
-    print(symptoms)
+    out = {}
+    for i in symptoms:
+        out[i] = ask_severity_questions(i)
+    print( out)
+    # print(symptoms)
     # for i in symptoms:
     #     out[i] = {
     #             "how painfull": get1To10Scale(i),   make sure all of these are strings
