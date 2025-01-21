@@ -3,7 +3,6 @@ heath appointment maker
 
 # How to run app
 
-pip install llamaapi
 python3 getData.py
 python3 main.py
 
