@@ -129,7 +129,7 @@ with open("default_prompt.txt", 'r') as f:
 ", ".join(symptoms)
 
 
-str = "you can only choose from specific list of symptoms" 
-prompts = defaultPromptPart1 + str + ", ".join(symptoms) + defaultPromptPart2
+stri = "you can only choose from specific list of symptoms"
+prompts = defaultPromptPart1 + stri + ", ".join(symptoms) + defaultPromptPart2
 
 

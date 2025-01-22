@@ -4,7 +4,7 @@ import re
 from proscessInp import getSymptoms as gs
 
 DEBUG=True
-DEBUG=False
+# DEBUG=False
 
 def ask_severity_questions(symptom):
     print(f"On a scale of 1 to 10, how severe is your {symptom.lower()}?")

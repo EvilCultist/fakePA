@@ -1,6 +1,7 @@
 import json
 import requests
 import os
+from symptoms import prompts
 
 OLLAMA_MODEL = "llama3.2:latest"
 
@@ -11,7 +12,8 @@ with open("default_prompt.txt", 'r') as f:
 diff_port = os.getenv("OLLAMA_HOST")
 
 def getSymptoms(prompt, DEBUG=False):
-    prompt = defaultPrompt + prompt
+    # prompt = defaultPrompt + prompt
+    prompt = prompts + prompt
     if diff_port:
         url = "http://" + os.getenv("OLLAMA_HOST") + "/api/generate"
     else:
