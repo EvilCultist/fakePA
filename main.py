@@ -46,7 +46,7 @@ def translate_english(text):
         return "UNABLE TO TRANSLATE"
 
 if __name__ == '__main__':
-    text = translate_english(input("HI, How may I help you today? "))
+    text = translate_english(input("Hello! I am your medical assistant chatbot, I will  be asking you multiplequestions to help the doctor understand your situation better\n"))
     while True:
         if DEBUG:
             print(text)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
             symptoms = prsdInp["symptoms"]
             break
         elif prsdInp["status"] == "PLEASE REPROMPT":
-            text = translate_english(input(prsdInp["reprompt with"]))
+            text += " " + translate_english(input(prsdInp["reprompt with"]))
         else:
             print(prsdInp)
             exit()
