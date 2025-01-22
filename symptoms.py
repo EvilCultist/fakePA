@@ -98,8 +98,8 @@ symptoms = [
 # defaultPrompt = 'what is bigger pi square or g'
 with open("default_prompt.txt", 'r') as f:
     lines = f.readlines()
-    defaultPromptPart1 = "".join(lines[:5])
-    defaultPromptPart2 = "".join(lines[5:])
+    defaultPromptPart1 = "".join(lines[:3])
+    defaultPromptPart2 = "".join(lines[3:])
 
 
 
@@ -126,10 +126,9 @@ with open("default_prompt.txt", 'r') as f:
 # 	"reprompt with": "Please explain where you are experiencing pain"
 
 
-", ".join(symptoms)
 
 
-stri = "you can only choose from specific list of symptoms"
+stri = "you can only choose from one of these of symptoms - "
 prompts = defaultPromptPart1 + stri + ", ".join(symptoms) + defaultPromptPart2
 
 

@@ -8,23 +8,23 @@ DEBUG=True
 
 def ask_severity_questions(symptom):
     print(f"On a scale of 1 to 10, how severe is your {symptom.lower()}?")
-    severity = input("You: ").strip()
+    severity = translate_english(input("You: ").strip())
     print(f"Chatbot: Thank you for sharing. ({severity})")
 
     print(f"Chatbot: How frequently do you experience {symptom.lower()}? (e.g., occasionally, daily, constantly)")
-    frequency = input("You: ").strip()
+    frequency = translate_english(input("You: ").strip())
     print(f"Chatbot: Thank you for sharing. ({frequency})")
 
     print(f"Chatbot: When did your {symptom.lower()} start? (e.g., 2 days ago, 1 week ago)")
-    duration = input("You: ").strip()
+    duration = translate_english(input("You: ").strip())
     print(f"Chatbot: Thank you for sharing. ({duration})")
 
     print("Are you currently on any medications or supplements?")
-    ongoing_medications = input("You: ").strip()
+    ongoing_medications = translate_english(input("You: ").strip())
     print(f"ChatbotChatbot: Thank you for sharing. ({ongoing_medications})")
 
     print(f"Does anyone in your family have a history of {symptom.lower()} or related conditions?")
-    family_history = input("You :").strip()
+    family_history = translate_english(input("You :").strip())
     print(f"ChatbotChatbot: Thank you for sharing. ({family_history})")
     return {
                 "severity": severity,   # make sure all of these are strings
@@ -35,6 +35,8 @@ def ask_severity_questions(symptom):
            }
 
 def translate_english(text):
+    if text.isnumeric():
+        return text
     url = "https://deep-translator-api.azurewebsites.net/google/"
     objectvalue = {"source": "auto","target": "en","text": f"{text}","proxies": []}
     try:
@@ -43,10 +45,10 @@ def translate_english(text):
         translated_text = decodedtext.split(',"error')[0][16:-1]
         return translated_text
     except:
-        return "UNABLE TO TRANSLATE"
+        return "Please reprompt as the translation is experiencing issues"
 
 if __name__ == '__main__':
-    text = translate_english(input("Hello! I am your medical assistant chatbot, I will  be asking you multiplequestions to help the doctor understand your situation better\n"))
+    text = translate_english(input("Hello! I am your medical assistant chatbot, I will  be asking you multiple questions to help the doctor understand your situation better\n"))
     while True:
         if DEBUG:
             print(text)
@@ -55,7 +57,7 @@ if __name__ == '__main__':
             symptoms = prsdInp["symptoms"]
             break
         elif prsdInp["status"] == "PLEASE REPROMPT":
-            text += " " + translate_english(input(prsdInp["reprompt with"]))
+            text += " " + "you said: "+ prsdInp["reprompt with"] +" " + translate_english(input(prsdInp["reprompt with"]))
         else:
             print(prsdInp)
             exit()

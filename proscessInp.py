@@ -12,8 +12,8 @@ with open("default_prompt.txt", 'r') as f:
 diff_port = os.getenv("OLLAMA_HOST")
 
 def getSymptoms(prompt, DEBUG=False):
-    # prompt = defaultPrompt + prompt
-    prompt = prompts + prompt
+    prompt = defaultPrompt + prompt
+    # prompt = prompts + prompt
     if diff_port:
         url = "http://" + os.getenv("OLLAMA_HOST") + "/api/generate"
     else:
@@ -36,6 +36,7 @@ def getSymptoms(prompt, DEBUG=False):
         data = json.loads(txtOut)
         actual_response = data["response"]
         actual_response = json.loads(actual_response)
+        print(actual_response)
         if DEBUG:
             print(actual_response["status"])
             if actual_response["status"]=="OK":
