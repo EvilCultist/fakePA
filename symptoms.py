@@ -17,7 +17,7 @@ symptoms = [
     "Back Pain",
     "Extreme Thirst",
     "Pain in Left Shoulder",
-    "Difficulty Sleeping (Orthopnea)",
+    "Insomnia (Orthopnea)",
     "Fainting (Syncope)",
     "Rapid Heart Rate",
     "Persistent Cough",
