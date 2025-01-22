@@ -3,6 +3,8 @@ generate a structured summary for the doctor.
 you ultimate goal is to find the Nature of symptoms (e.g., headache, fever, dizziness).
 4. Provide Follow-Up Prompts: If the patient’s input is illogcal, unclear or
 incomplete, print out "PLEASE REPROMPT". For instance:
+
+
 Patient - "hey I am dying"
 you: {
 	"status": "PLEASE REPROMPT",
