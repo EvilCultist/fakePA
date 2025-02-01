@@ -11,41 +11,44 @@ with open("default_prompt.txt", 'r') as f:
 
 diff_port = os.getenv("OLLAMA_HOST")
 
-def getSymptoms(prompt, DEBUG=False):
-    prompt = defaultPrompt + prompt
+def getSymptoms(pin, DEBUG=False):
+    prompt = defaultPrompt + pin
     # prompt = prompts + prompt
     if diff_port:
         url = "http://" + os.getenv("OLLAMA_HOST") + "/api/generate"
     else:
         url = "http://localhost:11434/api/generate"
-
     headers = {
             "Content-Type": "application/json"
     }
 
-    data = {
-            "model": OLLAMA_MODEL,
-            "prompt": prompt,
-            "stream": False
-    }
+    while True:
+        data = {
+                "model": OLLAMA_MODEL,
+                "prompt": prompt,
+                "stream": False
+        }
 
-    response = requests.post(url, headers=headers, data=json.dumps(data))
+        response = requests.post(url, headers=headers, data=json.dumps(data))
 
-    if response.status_code == 200:
-        txtOut = response.text
-        data = json.loads(txtOut)
-        actual_response = data["response"]
-        actual_response = json.loads(actual_response)
-        print(actual_response)
-        if DEBUG:
-            print(actual_response["status"])
-            if actual_response["status"]=="OK":
-                print(actual_response["symptoms"])
-            else:
-                print(actual_response["reprompt with"])
-        return actual_response
-    else:
-        print("status code: \t", response.status_code)
-        print(response.text)
-        return {"status": response.status_code, "why": response.text}
+        if response.status_code == 200:
+            txtOut = response.text
+            data = json.loads(txtOut)
+            actual_response = data["response"]
+            try:
+                actual_response = json.loads(actual_response)
+            except:
+                prompt = defaultPrompt + "make sure your output contains only valid json, and nothing else, now, what would you say if your input was - " + pin
+            print(actual_response)
+            if DEBUG:
+                print(actual_response["status"])
+                if actual_response["status"]=="OK":
+                    print(actual_response["symptoms"])
+                else:
+                    print(actual_response["reprompt with"])
+            return actual_response
+        else:
+            print("status code: \t", response.status_code)
+            print(response.text)
+            return {"status": response.status_code, "why": response.text}
 
