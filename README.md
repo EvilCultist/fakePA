@@ -4,6 +4,7 @@ heath appointment maker
 # How to run app
 
 sudo apt install python3-pyaudio
+sudo apt install python3-whisper
 python3 getData.py
 python3 main.py
 
