@@ -6,6 +6,71 @@ from proscessInp import getSymptoms as gs
 DEBUG=True
 DEBUG=False
 
+def patient_demographics():
+    print("Patient's Name:")
+    name = translate_english(input().strip())
+
+    print("Patient's Date of Birth:")
+    dob = translate_english(input(). strip())
+
+    print("Patient's Age:")
+    age = translate_english(input(). strip())
+
+    print("Patient's Gender:")
+    gender = translate_english(input(). strip())
+
+    print("Patient's Medical Record Number:")
+    med_num = translate_english(input(). strip())
+
+    print("Presenting Day and time:")
+    day_time = translate_english(input(). split())
+
+    print("Referred by Doctor(if applicable):")
+    referred = translate_english(input(). split())
+
+    print("Clinical Assessment given by Junior Doctor:")
+    clinical_assessment = translate_english(input(). split())
+
+    print("Any social history such as alcohol , smoking ,etc.:")
+    social_history = translate_english(input(). split())
+
+    print("Any allergies:")
+    allergies= translate_english(input(). split())
+
+    print("Vital Signs:-")
+    print("BP (Blood Pressure):")
+    bp = translate_english(input(). split())
+
+    print("HR (Heart Rate):")
+    hr = translate_english(input(). split())
+
+    print("SpO2 (Oxygen Saturation):")
+    spo2 = translate_english(input(). split())
+
+    print("Referrals (if needed):")
+    referral = translate_english(input(). split())
+
+    print("Key Findings:")
+    key_findings = translate_english(input(). split())
+
+
+    return {  "Name" : name, 
+              "Date_of_birth" : dob,
+               "Age": age,
+               "Gender": gender,
+               "medical_record_number" : med_num,
+               "Day_and_time" : day_time,
+               "Referred_by_doctor": referred,
+               "clinical_assessment" : clinical_assessment,
+               "Social_habits": social_history,
+               "Allergies": allergies,
+               "BP" : bp,
+               "HR": hr,
+               "SpO2" : spo2,
+               "Referrals" : referral,
+               "Conclusion" : key_findings
+            }
+
 def ask_severity_questions(symptom):
     print(f"On a scale of 1 to 10, how severe is your {symptom.lower()}?")
     severity = translate_english(input("You: ").strip())
@@ -65,6 +130,7 @@ if __name__ == '__main__':
     for i in symptoms:
         out[i] = ask_severity_questions(i)
     print( out)
+
     # print(symptoms)
     # for i in symptoms:
     #     out[i] = {
