@@ -5,7 +5,7 @@ import pyttsx3
 import whisper
 
 fs = 44100
-seconds = 6
+seconds = 2
 
 myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=2)
 sd.wait()  # Wait until recording is finished
@@ -13,6 +13,7 @@ write('output.wav', fs, myrecording)  # Save as WAV file
 
 engine = pyttsx3.init()
 
+# model = whisper.load_model("large")
 model = whisper.load_model("medium")
 
 # load audio and pad/trim it to fit 30 seconds
