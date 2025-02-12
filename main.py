@@ -1,14 +1,16 @@
 import requests
 import json
 import re
+import fake_nlp
 from proscessInp import getSymptoms as gs
+from summary import generate_report
 
 DEBUG=True
 DEBUG=False
 
 def patient_demographics():
     print("Patient's Name:")
-    name = translate_english(input().strip())
+    name = input().strip()
 
     print("Patient's Date of Birth:")
     dob = translate_english(input(). strip())
@@ -22,36 +24,36 @@ def patient_demographics():
     print("Patient's Medical Record Number:")
     med_num = translate_english(input(). strip())
 
-    print("Presenting Day and time:")
-    day_time = translate_english(input(). split())
+    print("Present Day and time:")
+    day_time = translate_english(input(). strip())
 
     print("Referred by Doctor(if applicable):")
-    referred = translate_english(input(). split())
+    referred = translate_english(input(). strip())
 
     print("Clinical Assessment given by Junior Doctor:")
-    clinical_assessment = translate_english(input(). split())
+    clinical_assessment = translate_english(input(). strip())
 
     print("Any social history such as alcohol , smoking ,etc.:")
-    social_history = translate_english(input(). split())
+    social_history = translate_english(input(). strip())
 
     print("Any allergies:")
-    allergies= translate_english(input(). split())
+    allergies= translate_english(input(). strip())
 
     print("Vital Signs:-")
     print("BP (Blood Pressure):")
-    bp = translate_english(input(). split())
+    bp = translate_english(input(). strip())
 
     print("HR (Heart Rate):")
-    hr = translate_english(input(). split())
+    hr = translate_english(input(). strip())
 
     print("SpO2 (Oxygen Saturation):")
-    spo2 = translate_english(input(). split())
+    spo2 = translate_english(input(). strip())
 
     print("Referrals (if needed):")
-    referral = translate_english(input(). split())
+    referral = translate_english(input(). strip())
 
     print("Key Findings:")
-    key_findings = translate_english(input(). split())
+    key_findings = translate_english(input(). strip())
 
 
     return {  "Name" : name, 
@@ -114,22 +116,20 @@ def translate_english(text):
 
 if __name__ == '__main__':
     text = translate_english(input("Hello! I am your medical assistant chatbot, I will  be asking you multiple questions to help the doctor understand your situation better\n"))
-    while True:
-        if DEBUG:
-            print(text)
-        prsdInp = gs(text, DEBUG=DEBUG)
-        if prsdInp["status"] == "OK":
-            symptoms = prsdInp["symptoms"]
-            break
-        elif prsdInp["status"] == "PLEASE REPROMPT":
-            text += " " + "you said: "+ prsdInp["reprompt with"] +" " + translate_english(input(prsdInp["reprompt with"]))
-        else:
-            print(prsdInp)
-            exit()
-    out = {}
+    if DEBUG:
+        print(text)
+    # prsdInp = gs(text, DEBUG=DEBUG)
+    symptoms = fake_nlp.check_symptoms(text, fake_nlp.symptoms_list)
+    # print(symptoms)
+    out = []
     for i in symptoms:
-        out[i] = ask_severity_questions(i)
-    print( out)
+        out.append({"Symptom":i})
+        temp = ask_severity_questions(i)
+        for k in temp:
+            out[-1][k] = temp[k]
+    demographic_dict = patient_demographics()
+    generate_report(demographic_dict,out)
+
 
     # print(symptoms)
     # for i in symptoms:

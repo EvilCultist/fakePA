@@ -2,6 +2,8 @@ import json
 import requests
 import os
 from symptoms import prompts
+import summary
+import fake_nlp
 
 OLLAMA_MODEL = "llama3.2:latest"
 

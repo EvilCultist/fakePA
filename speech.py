@@ -1,7 +1,5 @@
 import sounddevice as sd
 from scipy.io.wavfile import write
-import speech_recognition as sr
-import pyttsx3
 import whisper
 
 fs = 44100
@@ -11,7 +9,7 @@ myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=2)
 sd.wait()  # Wait until recording is finished
 write('output.wav', fs, myrecording)  # Save as WAV file
 
-engine = pyttsx3.init()
+# engine = pyttsx3.init()
 
 # model = whisper.load_model("large")
 model = whisper.load_model("medium")
