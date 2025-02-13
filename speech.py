@@ -80,4 +80,7 @@ def getSpeech_google():
 if __name__=='__main__':
     # getSpeech_google()
     speak("How can I help you")
-    speak(listen()[0])
+    l = listen()[0]
+    print(l)
+    speak(l)
+    #speak(getSpeech_google())
