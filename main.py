@@ -4,56 +4,56 @@ import re
 import fake_nlp
 from proscessInp import getSymptoms as gs
 from summary import generate_report
-from speech import speak
+# from speech import speak
 
 DEBUG=True
 DEBUG=False
 
 def patient_demographics():
-    speak("Patient's Name:")
+    print("Patient's Name:")
     name = input().strip()
 
-    speak("Patient's Date of Birth:")
+    print("Patient's Date of Birth:")
     dob = translate_english(input(). strip())
 
-    speak("Patient's Age:")
+    print("Patient's Age:")
     age = translate_english(input(). strip())
 
-    speak("Patient's Gender:")
+    print("Patient's Gender:")
     gender = translate_english(input(). strip())
 
-    speak("Patient's Medical Record Number:")
+    print("Patient's Medical Record Number:")
     med_num = translate_english(input(). strip())
 
-    speak("Present Day and time:")
+    print("Present Day and time:")
     day_time = translate_english(input(). strip())
 
-    speak("Referred by Doctor(if applicable):")
+    print("Referred by Doctor(if applicable):")
     referred = translate_english(input(). strip())
 
-    speak("Clinical Assessment given by Junior Doctor:")
+    print("Clinical Assessment given by Junior Doctor:")
     clinical_assessment = translate_english(input(). strip())
 
-    speak("Any social history such as alcohol , smoking ,etc.:")
+    print("Any social history such as alcohol , smoking ,etc.:")
     social_history = translate_english(input(). strip())
 
-    speak("Any allergies:")
+    print("Any allergies:")
     allergies= translate_english(input(). strip())
 
-    speak("Vital Signs:-")
-    speak("BP (Blood Pressure):")
+    print("Vital Signs:-")
+    print("BP (Blood Pressure):")
     bp = translate_english(input(). strip())
 
-    speak("HR (Heart Rate):")
+    print("HR (Heart Rate):")
     hr = translate_english(input(). strip())
 
-    speak("SpO2 (Oxygen Saturation):")
+    print("SpO2 (Oxygen Saturation):")
     spo2 = translate_english(input(). strip())
 
-    speak("Referrals (if needed):")
+    print("Referrals (if needed):")
     referral = translate_english(input(). strip())
 
-    speak("Key Findings:")
+    print("Key Findings:")
     key_findings = translate_english(input(). strip())
 
 
@@ -75,25 +75,25 @@ def patient_demographics():
             }
 
 def ask_severity_questions(symptom):
-    speak(f"On a scale of 1 to 10, how severe is your {symptom.lower()}?")
+    print(f"On a scale of 1 to 10, how severe is your {symptom.lower()}?")
     severity = translate_english(input("You: ").strip())
-    speak(f"Thank you for sharing. ({severity})")
+    print(f"Thank you for sharing. ({severity})")
 
-    speak(f"How frequently do you experience {symptom.lower()}? (e.g., occasionally, daily, constantly)")
+    print(f"How frequently do you experience {symptom.lower()}? (e.g., occasionally, daily, constantly)")
     frequency = translate_english(input("You: ").strip())
-    speak(f"Thank you for sharing. ({frequency})")
+    print(f"Thank you for sharing. ({frequency})")
 
-    speak(f"When did your {symptom.lower()} start? (e.g., 2 days ago, 1 week ago)")
+    print(f"When did your {symptom.lower()} start? (e.g., 2 days ago, 1 week ago)")
     duration = translate_english(input("You: ").strip())
-    speak(f"Thank you for sharing. ({duration})")
+    print(f"Thank you for sharing. ({duration})")
 
-    speak("Are you currently on any medications or supplements?")
+    print("Are you currently on any medications or supplements?")
     ongoing_medications = translate_english(input("You: ").strip())
-    speak(f"Thank you for sharing. ({ongoing_medications})")
+    print(f"Thank you for sharing. ({ongoing_medications})")
 
-    speak(f"Does anyone in your family have a history of {symptom.lower()} or related conditions?")
+    print(f"Does anyone in your family have a history of {symptom.lower()} or related conditions?")
     family_history = translate_english(input("You :").strip())
-    speak(f"Thank you for sharing. ({family_history})")
+    print(f"Thank you for sharing. ({family_history})")
     return {
                 "severity": severity,   # make sure all of these are strings
                 "frequency": frequency,
@@ -118,10 +118,10 @@ def translate_english(text):
 if __name__ == '__main__':
     text = translate_english(input("Hello! I am your medical assistant chatbot, I will  be asking you multiple questions to help the doctor understand your situation better\n"))
     if DEBUG:
-        speak(text)
+        print(text)
     # prsdInp = gs(text, DEBUG=DEBUG)
     symptoms = fake_nlp.check_symptoms(text, fake_nlp.symptoms_list)
-    # speak(symptoms)
+    # print(symptoms)
     out = []
     for i in symptoms:
         out.append({"Symptom":i})
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     generate_report(demographic_dict,out)
 
 
-    # speak(symptoms)
+    # print(symptoms)
     # for i in symptoms:
     #     out[i] = {
     #             "how painfull": get1To10Scale(i),   make sure all of these are strings
@@ -260,9 +260,9 @@ if __name__ == '__main__':
 #         with open("symptoms.json", "w") as json_file:
 #             json.dump(symptoms, json_file, indent=4)
 # 
-#         speak(f"Saved {len(symptoms)} symptoms to 'symptoms.json'.")
+#         print(f"Saved {len(symptoms)} symptoms to 'symptoms.json'.")
 #     except Exception as e:
-#         speak(f"An error occurred: {e}")
+#         print(f"An error occurred: {e}")
 # 
 # fetch_and_save_symptoms()
 # 
@@ -270,13 +270,13 @@ if __name__ == '__main__':
 #     try:
 #         with open("symptoms.json", "r") as file:
 #             symptoms = json.load(file)
-#         speak("Symptoms successfully loaded.")
+#         print("Symptoms successfully loaded.")
 #         return symptoms
 #     except FileNotFoundError:
-#         speak("Symptoms file not found. Please ensure 'symptoms.json' exists.")
+#         print("Symptoms file not found. Please ensure 'symptoms.json' exists.")
 #         return []
 #     except json.JSONDecodeError:
-#         speak("Error decoding the symptoms file.")
+#         print("Error decoding the symptoms file.")
 #         return []
 # 
 # symptoms = load_symptoms()
@@ -291,38 +291,38 @@ if __name__ == '__main__':
 # 
 # 
 # def ask_severity_questions(symptom):
-#     speak(f"Chatbot: Can you describe the severity of your {symptom.lower()}? (e.g., mild, moderate, severe)")
+#     print(f"Chatbot: Can you describe the severity of your {symptom.lower()}? (e.g., mild, moderate, severe)")
 #     severity = input("You: ").strip()
-#     speak(f"Chatbot: Thank you for sharing. ({severity})")
+#     print(f"Chatbot: Thank you for sharing. ({severity})")
 # 
-#     speak(f"Chatbot: How frequently do you experience {symptom.lower()}? (e.g., occasionally, daily, constantly)")
+#     print(f"Chatbot: How frequently do you experience {symptom.lower()}? (e.g., occasionally, daily, constantly)")
 #     frequency = input("You: ").strip()
-#     speak(f"Chatbot: Thank you for sharing. ({frequency})")
+#     print(f"Chatbot: Thank you for sharing. ({frequency})")
 # 
-#     speak(f"Chatbot: When did your {symptom.lower()} start? (e.g., 2 days ago, 1 week ago)")
+#     print(f"Chatbot: When did your {symptom.lower()} start? (e.g., 2 days ago, 1 week ago)")
 #     duration = input("You: ").strip()
-#     speak(f"Chatbot: Thank you for sharing. ({duration})")
+#     print(f"Chatbot: Thank you for sharing. ({duration})")
 # 
 # def chatbot():
 #     if not symptoms:
-#         speak("Unable to load symptoms. Exiting chatbot.")
+#         print("Unable to load symptoms. Exiting chatbot.")
 #         return
 # 
-#     speak("Chatbot: Hi! Please describe your symptoms.")
+#     print("Chatbot: Hi! Please describe your symptoms.")
 #     while True:
 #         user_input = input("You: ").strip()
 #         if user_input.lower() in ["exit", "quit"]:
-#             speak("Chatbot: Thank you! Take care and feel better!")
+#             print("Chatbot: Thank you! Take care and feel better!")
 #             break
 # 
 #         matches = find_matching_symptoms(user_input, symptoms)
 #         if matches:
-#             speak(f"Chatbot: Based on your input, I found these related symptoms: {', '.join(matches)}.")
+#             print(f"Chatbot: Based on your input, I found these related symptoms: {', '.join(matches)}.")
 #             for match in matches:
 #                 ask_severity_questions(match)
-#             speak("Chatbot: Would you like to share more symptoms or exit?")
+#             print("Chatbot: Would you like to share more symptoms or exit?")
 #         else:
-#             speak("Chatbot: I'm sorry, I couldn't match your symptoms. Could you please describe them in more detail?")
+#             print("Chatbot: I'm sorry, I couldn't match your symptoms. Could you please describe them in more detail?")
 # 
 # 
 # chatbot()

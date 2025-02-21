@@ -6,6 +6,8 @@
 output.wav
 symptoms.json
 KnowledgeBaseRaw/
+fakepa-server/.zig-cache
+fakepa-server/zig-out
 
 
 
