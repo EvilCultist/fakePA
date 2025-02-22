@@ -7,6 +7,14 @@ const zap = @import("zap");
 fn on_request(r: zap.Request) void {
     if (r.path) |the_path| {
         std.debug.print("PATH: {s}\n", .{the_path});
+        if (std.mem.eql(u8, the_path, "/")) {
+            // r.sendFile("chatbot.html") catch |err| std.log.err()
+            if (r.sendFile("src/chatbot.html")) {
+                std.debug.print("It worked?\n", .{});
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}", .{err});
+            }
+        }
     }
 
     if (r.query) |the_query| {
@@ -23,6 +31,7 @@ pub fn main() !void {
         .log = true,
         .max_clients = 100000,
     });
+    zap.enableDebugLog();
     try listener.listen();
 
     std.debug.print("Listening on 0.0.0.0:3000\n", .{});
