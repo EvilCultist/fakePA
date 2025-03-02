@@ -4,6 +4,15 @@
 const std = @import("std");
 const zap = @import("zap");
 
+const a = std.mem.Allocator;
+const stdalloc = std.heap.c_allocator;
+
+const tn = struct{
+    var name: u8[20] = "";
+};
+
+const n_tokens = 0;
+
 fn on_request(r: zap.Request) void {
     if (r.path) |the_path| {
         std.debug.print("PATH: {s}\n", .{the_path});
@@ -14,17 +23,31 @@ fn on_request(r: zap.Request) void {
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}", .{err});
             }
+        }else if (std.mem.eql(u8, the_path, "api/addUser")){
+            if( r.sendBody("")){
+                std.debug.print("added user", .{});
+            }else |err| {
+                std.debug.print("well see sometimes things happen {any}", .{err});
+            }
         }
     }
 
     if (r.query) |the_query| {
         std.debug.print("QUERY: {s}\n", .{the_query});
     }
-
-    r.sendBody("<html><body><h1>Hello from ZAP!!!</h1></body></html>") catch return;
+    if( r.sendFile("src/404notFound.html")){
+        std.debug.print("page not found {any}", .{r.path});
+    }else |err| {
+        std.debug.print("well see sometimes things happen {any}", .{err});
+    }
+    r.sendBody("<html><body><h1>404 File not found</h1></body></html>") catch return;
 }
 
 pub fn main() !void {
+
+    const files: []tn = try a.alloc(stdalloc, tn, 200);
+    defer a.free(stdalloc, files);
+
     var listener = zap.HttpListener.init(.{
         .port = 3000,
         .on_request = on_request,
