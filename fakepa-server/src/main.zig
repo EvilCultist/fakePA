@@ -7,44 +7,96 @@ const zap = @import("zap");
 const a = std.mem.Allocator;
 const stdalloc = std.heap.c_allocator;
 
-const tn = struct{
+const tn = struct {
     var name: u8[20] = "";
+};
+
+const Role = enum { user, admin, doctor };
+
+const form_body = struct {
+    role: Role,
+    content: []const u8,
 };
 
 const n_tokens = 0;
 
+///json.static.Parsed(main.form_body){
+///     .arena = heap.arena_allocator.ArenaAllocator{
+///         .child_allocator = mem.Allocator{
+///             .ptr = anyopaque@0,
+///             .vtable = mem.Allocator.VTable{ ... }
+///         },
+///         .state = heap.arena_allocator.ArenaAllocator.State{
+///             .buffer_list = linked_list.SinglyLinkedList(usize){ ... },
+///             .end_index = 0
+///         }
+///     },
+///     .value = main.form_body{
+///         .role = main.Role.user,
+///         .content = { 110, 111 }
+///     }
+/// }
 fn on_request(r: zap.Request) void {
+    if (r.query) |the_query| {
+        std.debug.print("QUERY: {s}\n", .{the_query});
+        return;
+    }
+    if (r.body) |the_body| {
+        std.debug.print("BODY: {s}\n", .{the_body});
+        if (std.json.parseFromSlice(
+            form_body,
+            std.heap.page_allocator,
+            the_body,
+            .{},
+        )) |parsed| {
+            std.debug.print("message: {s}\n", .{parsed.value.content});
+        } else |err| {
+            std.debug.print("no message :( {any}\n", .{err});
+        }
+        return;
+    }
     if (r.path) |the_path| {
         std.debug.print("PATH: {s}\n", .{the_path});
         if (std.mem.eql(u8, the_path, "/")) {
             // r.sendFile("chatbot.html") catch |err| std.log.err()
-            if (r.sendFile("src/chatbot.html")) {
+            if (r.sendFile("web/index.html")) {
                 std.debug.print("It worked?\n", .{});
+                return;
             } else |err| {
-                std.log.err("oh nards, some error happened\n{any}", .{err});
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
             }
-        }else if (std.mem.eql(u8, the_path, "api/addUser")){
-            if( r.sendBody("")){
-                std.debug.print("added user", .{});
-            }else |err| {
-                std.debug.print("well see sometimes things happen {any}", .{err});
+        } else if (std.mem.eql(u8, the_path, "api/addUser")) {
+            if (r.sendBody("")) {
+                std.debug.print("added user\n", .{});
+                return;
+            } else |err| {
+                std.debug.print("well see sometimes things happen\n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "api/addMessage")) {
+            if (r.sendBody("")) {
+                std.debug.print("added message\n", .{});
+                return;
+            } else |err| {
+                std.debug.print("well see sometimes things happen\n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else {
+            if (r.sendFile("web/404.html")) {
+                std.debug.print("added user\n", .{});
+                return;
+            } else |err| {
+                std.debug.print("well see sometimes things happen\n {any}\n", .{err});
+                std.process.exit(1);
             }
         }
     }
 
-    if (r.query) |the_query| {
-        std.debug.print("QUERY: {s}\n", .{the_query});
-    }
-    if( r.sendFile("src/404notFound.html")){
-        std.debug.print("page not found {any}", .{r.path});
-    }else |err| {
-        std.debug.print("well see sometimes things happen {any}", .{err});
-    }
-    r.sendBody("<html><body><h1>404 File not found</h1></body></html>") catch return;
+    unreachable;
 }
 
 pub fn main() !void {
-
     const files: []tn = try a.alloc(stdalloc, tn, 200);
     defer a.free(stdalloc, files);
 

@@ -17,8 +17,10 @@ pub fn build(b: *std.Build) void {
         .openssl = false, // set to true to enable TLS support
     });
 
+    // exe_mod.addImport("zap", zap);
+
     const exe = b.addExecutable(.{
-        .name = "fakepa-server",
+        .name = "fakepa_server",
         .root_module = exe_mod,
     });
 
