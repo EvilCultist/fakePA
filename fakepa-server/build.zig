@@ -5,13 +5,13 @@ pub fn build(b: *std.Build) void {
 
     const optimize = b.standardOptimizeOption(.{});
 
-    const pg = b.dependency("pg", .{
+    const exe_mod = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    const exe_mod = b.createModule(.{
-        .root_source_file = b.path("src/main.zig"),
+    const pg = b.dependency("pg", .{
         .target = target,
         .optimize = optimize,
     });
@@ -21,6 +21,12 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .openssl = false, // set to true to enable TLS support
     });
+
+    // const lib_mod = b.createModule(.{
+    //     .root_source_file = b.path("src/root.zig"),
+    //     .target = target,
+    //     .optimize = optimize,
+    // });
 
     // exe_mod.addImport("zap", zap);
 
@@ -33,6 +39,18 @@ pub fn build(b: *std.Build) void {
 
     // the executable from your call to b.addExecutable(...)
     exe.root_module.addImport("pg", pg.module("pg"));
+
+    // exe.root_module.addImport("routes", lib_mod);
+    //
+    // const lib = b.addLibrary(.{
+    //     .linkage = .static,
+    //     .name = "routes",
+    //     .root_module = lib_mod,
+    // });
+    //
+    // lib.root_module.addImport("zap", zap.module("zap"));
+
+    // b.installArtifact(lib);
 
     b.installArtifact(exe);
 

@@ -4,6 +4,7 @@
 const std = @import("std");
 const zap = @import("zap");
 const pg = @import("pg");
+// const routes = @import("routes");
 
 const a = std.mem.Allocator;
 const stdalloc = std.heap.c_allocator;
@@ -21,12 +22,6 @@ const form_body = struct {
 
 const n_tokens = 0;
 
-// while (try result.next()) |row| {
-//   const id = row.get(i32, 0);
-//   // this is only valid until the next call to next(), deinit() or drain()
-//   const name = row.get([]u8, 1);
-// }
-
 ///json.static.Parsed(main.form_body){
 ///     .arena = heap.arena_allocator.ArenaAllocator{
 ///         .child_allocator = mem.Allocator{
@@ -43,6 +38,62 @@ const n_tokens = 0;
 ///         .content = { 110, 111 }
 ///     }
 /// }
+
+// fn query_exit(err: ) void{
+//         std.debug.print("query error {any}", .{err});
+//         std.process.exit(1);
+// }
+
+pub fn main() !void {
+    var pool = pg.Pool.init(stdalloc, .{ .size = 20, .connect = .{
+        .port = 5432,
+        .host = "127.0.0.1",
+    }, .auth = .{
+        .username = "postgres",
+        .database = "postgres",
+        .timeout = 2_592_000,
+    } }) catch |err| {
+        std.debug.print("pg error {any}", .{err});
+        std.process.exit(1);
+    };
+    defer pool.deinit();
+
+    _ = pool.query("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";", .{}) catch |err| {
+        std.debug.print("query error {any}", .{err});
+        std.process.exit(1);
+    };
+
+    var result = pool.query("select 4", .{}) catch |err| {
+        std.debug.print("query error {any}", .{err});
+        std.process.exit(1);
+    };
+    defer result.deinit();
+
+    while (try result.next()) |row| {
+        std.debug.print("{any}\n", .{row.get(i32, 0)});
+        // this is only valid until the next call to next(), deinit() or drain()
+    }
+
+    const files: []tn = try a.alloc(stdalloc, tn, 200);
+    defer a.free(stdalloc, files);
+
+    var listener = zap.HttpListener.init(.{
+        .port = 3000,
+        .on_request = on_request,
+        .log = true,
+        .max_clients = 100000,
+    });
+    zap.enableDebugLog();
+    try listener.listen();
+
+    std.debug.print("Listening on 0.0.0.0:3000\n", .{});
+
+    zap.start(.{
+        .threads = 2,
+        .workers = 1, // 1 worker enables sharing state between threads
+    });
+}
+
 fn on_request(r: zap.Request) void {
     if (r.query) |the_query| {
         std.debug.print("QUERY: {s}\n", .{the_query});
@@ -134,84 +185,3 @@ fn on_request(r: zap.Request) void {
 
     unreachable;
 }
-
-pub fn main() !void {
-    // var pool = pg.Pool.init(stdalloc, .{ .size = 20, .connect = .{
-    //     .port = 5432,
-    //     .host = "127.0.0.1",
-    // }, .auth = .{
-    //     .username = "postgres",
-    //     .database = "postgres",
-    //     .timeout = 10_000_000,
-    // } }) catch |err| {
-    //     std.debug.print("pg error {any}", .{err});
-    //     std.process.exit(1);
-    // };
-    // defer pool.deinit();
-    //
-    // var result = pool.query("select 4", .{9000}) catch |err| {
-    //     std.debug.print("query error {any}", .{err});
-    //     std.process.exit(1);
-    // };
-    // defer result.deinit();
-    //
-    // const files: []tn = try a.alloc(stdalloc, tn, 200);
-    // defer a.free(stdalloc, files);
-
-    var listener = zap.HttpListener.init(.{
-        .port = 3000,
-        .on_request = on_request,
-        .log = true,
-        .max_clients = 100000,
-    });
-    zap.enableDebugLog();
-    try listener.listen();
-
-    std.debug.print("Listening on 0.0.0.0:3000\n", .{});
-
-    zap.start(.{
-        .threads = 2,
-        .workers = 1, // 1 worker enables sharing state between threads
-    });
-}
-// pub fn main() !void {
-//     // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-//     std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
-//
-//     // stdout is for the actual output of your application, for example if you
-//     // are implementing gzip, then only the compressed bytes should be sent to
-//     // stdout, not any debugging messages.
-//     const stdout_file = std.io.getStdOut().writer();
-//     var bw = std.io.bufferedWriter(stdout_file);
-//     const stdout = bw.writer();
-//
-//     try stdout.print("Run `zig build test` to run the tests.\n", .{});
-//
-//     try bw.flush(); // Don't forget to flush!
-// }
-//
-// test "simple test" {
-//     var list = std.ArrayList(i32).init(std.testing.allocator);
-//     defer list.deinit(); // Try commenting this out and see if zig detects the memory leak!
-//     try list.append(42);
-//     try std.testing.expectEqual(@as(i32, 42), list.pop());
-// }
-//
-// test "use other module" {
-//     try std.testing.expectEqual(@as(i32, 150), lib.add(100, 50));
-// }
-//
-// test "fuzz example" {
-//     const global = struct {
-//         fn testOne(input: []const u8) anyerror!void {
-//             // Try passing `--fuzz` to `zig build test` and see if it manages to fail this test case!
-//             try std.testing.expect(!std.mem.eql(u8, "canyoufindme", input));
-//         }
-//     };
-//     try std.testing.fuzz(global.testOne, .{});
-// }
-//
-// const std = @import("std");
-//
-// /// This imports the separate module containing `root.zig`. Take a look in `build.zig` for details.
-// const lib = @import("fakepa-server_lib");
