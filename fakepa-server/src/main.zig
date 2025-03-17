@@ -3,6 +3,7 @@
 //! is to delete this file and start with root.zig instead.
 const std = @import("std");
 const zap = @import("zap");
+const pg = @import("pg");
 
 const a = std.mem.Allocator;
 const stdalloc = std.heap.c_allocator;
@@ -19,6 +20,31 @@ const form_body = struct {
 };
 
 const n_tokens = 0;
+
+
+var pool = try pg.Pool.init(a, .{
+  .size = 5,
+  .connect = .{
+    .port = 5432,
+    .host = "127.0.0.1",
+  },
+  .auth = .{
+    .username = "postgres",
+    .database = "postgres",
+    .timeout = 10_000,
+  }
+});
+defer pool.deinit();
+
+var result = try pool.query("select id, name from users where power > $1", .{9000});
+defer result.deinit();
+
+while (try result.next()) |row| {
+  const id = row.get(i32, 0);
+  // this is only valid until the next call to next(), deinit() or drain()
+  const name = row.get([]u8, 1);
+}
+
 
 ///json.static.Parsed(main.form_body){
 ///     .arena = heap.arena_allocator.ArenaAllocator{

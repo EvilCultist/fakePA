@@ -5,6 +5,11 @@ pub fn build(b: *std.Build) void {
 
     const optimize = b.standardOptimizeOption(.{});
 
+    const pg = b.dependency("pg", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     const exe_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
@@ -25,6 +30,9 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.root_module.addImport("zap", zap.module("zap"));
+
+    // the executable from your call to b.addExecutable(...)
+    exe.root_module.addImport("pg", pg.module("pg"));
 
     b.installArtifact(exe);
 
