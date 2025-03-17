@@ -1,5 +1,5 @@
 import re
-from fuzzywuzzy import fuzz
+# from fuzzywuzzy import fuzz
 import nltk
 from itertools import combinations as combos
 from copy import deepcopy
@@ -21,7 +21,8 @@ expanded_stopwords = [
 ]
 
 # Combine with NLTK stopwords
-stopwords = set(nltk.corpus.stopwords.words('english')) | set(expanded_stopwords)
+stopwords = list(set(nltk.corpus.stopwords.words('english')) | set(expanded_stopwords))
+print(stopwords)
 
 # List of symptoms directly in code
 symptoms_list = []
