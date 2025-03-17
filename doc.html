@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swarup's Homepage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(to right, #FF99AC, #FAE0E4);
+            min-height: 100vh;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+        }
+        nav ul li {
+            margin-left: 20px;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: #000000;
+            font-size: 16px;
+            font-weight: 400;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        .horizontal-line {
+            width: 100%;
+            height: 1px;
+            background-color: #000000;
+            margin-top: 10px;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #1E3A56;
+            position: fixed;
+            left: -250px;
+            top: 50px;
+            transition: 0.3s;
+            padding-top: 60px;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .toggle-btn {
+            position: absolute;
+            top: 10px;
+            left: 260px;
+            width: 40px;
+            height: 40px;
+            background: #FFD60A;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 20px;
+        }
+        .sidebar ul li {
+            padding: 15px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar ul li:hover {
+            background: #003566;
+        }
+        .logout {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+        }
+
+        /* Neurology Department Bar */
+        .department-bar {
+            background-color: #98F5E1;
+            color: black;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 10px 0;
+            margin: 20px auto;
+            width: 50%;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.jpg" alt="Swarup's Logo">
+            <span class="logo-text">Swarup</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#">Learn More</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">Blogs</a></li>
+                <li><a href="#">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="horizontal-line"></div>
+
+    <!-- Neurology Department Bar -->
+    <div class="container">
+        <div class="department-bar">
+            Neurology Department
+        </div>
+    </div>
+
+    <!-- 🔹 Search Bar -->
+    <div class="container">
+        <input type="text" id="searchBar" class="search-bar" placeholder="Search patient records..." onkeyup="searchTable()">
+    </div>
+
+    <!-- 🔹 Patient Records Table -->
+    <table class="patient-table">
+        <thead>
+            <tr>
+                <th>Medical Record No.</th>
+                <th>Name</th>
+                <th>Date Of Birth</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Weight</th>
+                <th>Height</th>
+                <th>Habits</th>
+                <th>Medical History</th>
+                <th>Allergies</th>
+                <th>Patient Report (PDF)</th>
+                <th>Transcript</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Sample Data Row -->
+            <tr>
+                <td>MR001</td>
+                <td>John Doe</td>
+                <td>01/02/1985</td>
+                <td>39</td>
+                <td>Male</td>
+                <td>75kg</td>
+                <td>180cm</td>
+                <td>Smoking</td>
+                <td>Diabetes</td>
+                <td>Peanuts</td>
+                <td>
+                    <a href="patient_report.pdf" class="btn" download>📄 Download</a>
+                </td>
+                <td>
+                    <button class="transcript-btn" onclick="openTranscript('MR001')">📝 View</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- 🔹 Transcript Modal -->
+    <div id="transcriptModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTranscript()">&times;</span>
+            <h2>Chatbot Transcript</h2>
+            <div id="chatTranscript"></div>
+        </div>
+    </div>
+
+    <script>
+        // Open the modal and fetch chat transcript from API
+        async function openTranscript(medicalRecordNo) {
+            const transcriptDiv = document.getElementById("chatTranscript");
+            transcriptDiv.innerHTML = "<p>Loading transcript...</p>"; // Show loading state
+    
+            try {
+                const response = await fetch(`/api/transcript?user=${medicalRecordNo}`);
+                if (!response.ok) throw new Error("Failed to fetch transcript");
+    
+                const chatData = await response.json();
+                transcriptDiv.innerHTML = ""; // Clear previous data
+    
+                if (chatData.length > 0) {
+                    chatData.forEach(msg => {
+                        const messageDiv = document.createElement("div");
+                        messageDiv.classList.add("chat-message");
+                        messageDiv.classList.add(msg.sender === "Patient" ? "user-message" : "bot-message");
+                        messageDiv.innerText = `${msg.sender}: ${msg.text}`;
+                        transcriptDiv.appendChild(messageDiv);
+                    });
+                } else {
+                    transcriptDiv.innerHTML = "<p>No transcript available.</p>";
+                }
+    
+            } catch (error) {
+                transcriptDiv.innerHTML = "<p>Error loading transcript. Please try again.</p>";
+            }
+    
+            document.getElementById("transcriptModal").style.display = "flex";
+        }
+    
+        // Close the modal
+        function closeTranscript() {
+            document.getElementById("transcriptModal").style.display = "none";
+        }
+    </script>    
+    
+    <div class="sidebar" id="sidebar">
+        <div class="toggle-btn" onclick="toggleSidebar()">☰</div>
+        <ul>
+            <li>🪟 Dashboard</li>
+            <li>🧑‍⚕️ Patients</li>
+            <li>📅 Appointments</li>
+            <li>⚙️ Settings</li>
+            <li>⏻ Log Out</li>
+        </ul>
+    </div>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+    </script>
+
+    <style>
+        /* Search Bar Styling */
+        .search-bar {
+            width: 50%;
+            padding: 10px;
+            border: 2px solid #003566;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* Patient Table */
+        .patient-table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .patient-table th, .patient-table td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .patient-table th {
+            background: #003566;
+            color: white;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            width: 60%;
+            border-radius: 10px;
+            text-align: left;
+            position: relative;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Chat Transcript Formatting */
+        .chat-message {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+
+        .user-message {
+            background: #FFD60A;
+            text-align: right;
+        }
+
+        .bot-message {
+            background: #FAE0E4;
+            text-align: left;
+        }
+
+        /* Buttons */
+        .btn, .transcript-btn {
+            background: #FFD60A;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .transcript-btn:hover {
+            background: #FFC300;
+        }
+    </style>
+</body>
+</html>
