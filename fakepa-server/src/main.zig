@@ -21,30 +21,28 @@ const form_body = struct {
 
 const n_tokens = 0;
 
+// var pool = try pg.Pool.init(a, .{
+//   .size = 5,
+//   .connect = .{
+//     .port = 5432,
+//     .host = "127.0.0.1",
+//   },
+//   .auth = .{
+//     .username = "postgres",
+//     .database = "postgres",
+//     .timeout = 10_000,
+//   }
+// });
+// defer pool.deinit();
+//
+// var result = try pool.query("select id, name from users where power > $1", .{9000});
+// defer result.deinit();
 
-var pool = try pg.Pool.init(a, .{
-  .size = 5,
-  .connect = .{
-    .port = 5432,
-    .host = "127.0.0.1",
-  },
-  .auth = .{
-    .username = "postgres",
-    .database = "postgres",
-    .timeout = 10_000,
-  }
-});
-defer pool.deinit();
-
-var result = try pool.query("select id, name from users where power > $1", .{9000});
-defer result.deinit();
-
-while (try result.next()) |row| {
-  const id = row.get(i32, 0);
-  // this is only valid until the next call to next(), deinit() or drain()
-  const name = row.get([]u8, 1);
-}
-
+// while (try result.next()) |row| {
+//   const id = row.get(i32, 0);
+//   // this is only valid until the next call to next(), deinit() or drain()
+//   const name = row.get([]u8, 1);
+// }
 
 ///json.static.Parsed(main.form_body){
 ///     .arena = heap.arena_allocator.ArenaAllocator{
@@ -106,6 +104,22 @@ fn on_request(r: zap.Request) void {
                 return;
             } else |err| {
                 std.debug.print("well see sometimes things happen\n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/kanishk-testing")) {
+            if (r.sendFile("web/fakenlp.html")) {
+                std.debug.print("It worked?\n", .{});
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/fakenlp.js")) {
+            if (r.sendFile("web/fakenlp.js")) {
+                std.debug.print("It worked?\n", .{});
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
                 std.process.exit(1);
             }
         } else {
