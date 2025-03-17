@@ -21,23 +21,6 @@ const form_body = struct {
 
 const n_tokens = 0;
 
-// var pool = try pg.Pool.init(a, .{
-//   .size = 5,
-//   .connect = .{
-//     .port = 5432,
-//     .host = "127.0.0.1",
-//   },
-//   .auth = .{
-//     .username = "postgres",
-//     .database = "postgres",
-//     .timeout = 10_000,
-//   }
-// });
-// defer pool.deinit();
-//
-// var result = try pool.query("select id, name from users where power > $1", .{9000});
-// defer result.deinit();
-
 // while (try result.next()) |row| {
 //   const id = row.get(i32, 0);
 //   // this is only valid until the next call to next(), deinit() or drain()
@@ -122,6 +105,22 @@ fn on_request(r: zap.Request) void {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
                 std.process.exit(1);
             }
+        } else if (std.mem.eql(u8, the_path, "/vocab.txt")) {
+            if (r.sendFile("web/vocab.txt")) {
+                std.debug.print("It worked?\n", .{});
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/vectors.txt")) {
+            if (r.sendFile("web/vectors.txt")) {
+                std.debug.print("It worked?\n", .{});
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
         } else {
             if (r.sendFile("web/404.html")) {
                 std.debug.print("added user\n", .{});
@@ -137,8 +136,27 @@ fn on_request(r: zap.Request) void {
 }
 
 pub fn main() !void {
-    const files: []tn = try a.alloc(stdalloc, tn, 200);
-    defer a.free(stdalloc, files);
+    // var pool = pg.Pool.init(stdalloc, .{ .size = 20, .connect = .{
+    //     .port = 5432,
+    //     .host = "127.0.0.1",
+    // }, .auth = .{
+    //     .username = "postgres",
+    //     .database = "postgres",
+    //     .timeout = 10_000_000,
+    // } }) catch |err| {
+    //     std.debug.print("pg error {any}", .{err});
+    //     std.process.exit(1);
+    // };
+    // defer pool.deinit();
+    //
+    // var result = pool.query("select 4", .{9000}) catch |err| {
+    //     std.debug.print("query error {any}", .{err});
+    //     std.process.exit(1);
+    // };
+    // defer result.deinit();
+    //
+    // const files: []tn = try a.alloc(stdalloc, tn, 200);
+    // defer a.free(stdalloc, files);
 
     var listener = zap.HttpListener.init(.{
         .port = 3000,
