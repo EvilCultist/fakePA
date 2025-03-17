@@ -24,11 +24,11 @@ triple jointed thumb
 pain abdomen 
 fainting drowsiness 
 clammy skin 
-nausea vomiting 
+vomit
 rapid heart rate 
 shock 
 bleeding spotting vagina period 
-period occur le 28 day apart  35 day apart 
+period occur le 28 day apart 35 day apart
 time period change month 
 heavier bleeding 
 bleeding last day normal 7 day 
@@ -53,7 +53,7 @@ feeling drunkenness
 lack coordination 
 difficulty breathing 
 increased need urinate 
-backflow  food 
+backflow food
 chest pain 
 which may increase eating or may felt pain back neck and arm 
 cough 
@@ -895,8 +895,7 @@ pain upper right side upper middle part abdomen
 it may also felt back right shoulder blade 
 the pain may come go feel sharp 
 cramp like 
-or dull 
-pain right upper middle upper abdomen least 30 minute 
+dull pain right upper middle upper abdomen least 30 minute
 the pain may constant intense 
 it mild severe 
 dry skin 
@@ -946,7 +945,7 @@ yellow deposit fatty material skin called xanthoma growth may appear back buttoc
 small red spider like blood vessel skin 
 fluid buildup leg  abdomen  
 redness palm hand 
-in men impotence shrinking testicle breast swelling 
+men impotence shrinking testicle breast swelling
 easy bruising abnormal bleeding 
 most often swollen vein digestive tract 
 bleeding upper lower gastrointestinal tract 
@@ -1394,8 +1393,10 @@ spidery finger
 abdominal discomfort 
 decreased sweating affected side face 
 sinking eyeball face 
-different size pupil eye  affected side pupil smaller 
-vertigo  nausea vomiting 
+different size pupil eye affected side pupil smaller
+vertigo
+nausea
+vomiting
 one sided neck ear pain 
 overreaction involuntary  nervous system stimulation  
 behavioral disturbance 
@@ -1486,7 +1487,7 @@ pain may get worse move head
 itching ear ear canal 
 limited ability tolerate exercise 
 urine smell like maple syrup 
-a chest sink stick called funnel chest  pigeon breast  
+chest sink stick called funnel chest pigeon breast
 highly arched palate crowded teeth 
 joint flexible  
 movement lens eye normal position  
@@ -1499,7 +1500,7 @@ bloodshot eye
 tiny white spot inside mouth  
 abnormal strength direction urine stream 
 bed wetting 
-bleeding  end urination 
+bleeding end urination
 visible narrowing urethral opening boy 
 swelling redness eyelid edge 
 slight blurring vision due excess oil tear 
