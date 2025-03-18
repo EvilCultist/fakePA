@@ -7,12 +7,32 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    
+
+    <header>
+        <div class="logo">
+            <img src="logo.jpg" alt="Swarup Logo"> 
+            <span class="logo-text">Swarup</span>
+        </div>
+    
+        <nav>
+            <ul>
+                <li><a href="#">Learn More</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">Blogs</a></li>
+                <li><a href="#">Terms and Conditions</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+
+    
     <div class="container">
         <div class="form-box">
             <h1 id="title">Login</h1>
             <form id="form">
                 <div class="input-group">
-                    <!-- Common Fields for Both Login and Signup -->
                     <div class="input-field">
                         <input type="text" placeholder="Username" required>
                     </div>
@@ -23,7 +43,6 @@
                         <input type="password" placeholder="Password" required>
                     </div>
 
-                    <!-- Additional Sign Up Fields -->
                     <div id="signupFields" style="display: none;">
                         <div class="input-field">
                             <input type="text" placeholder="Full Name" required>
@@ -57,7 +76,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="btn-field">
                     <button type="button" id="loginBtn" class="active">Login</button>
                     <button type="button" id="signupBtn">Sign Up</button>
