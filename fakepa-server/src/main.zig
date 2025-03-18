@@ -132,8 +132,7 @@ fn on_request(r: zap.Request) void {
         std.debug.print("PATH: {s}\n", .{the_path});
         if (std.mem.eql(u8, the_path, "/")) {
             // r.sendFile("chatbot.html") catch |err| std.log.err()
-            if (r.sendFile("web/index.html")) {
-                std.debug.print("It worked?\n", .{});
+            if (r.sendFile("web/doc.html")) {
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
@@ -149,6 +148,7 @@ fn on_request(r: zap.Request) void {
                     .{},
                 )) |parsed| {
                     const val = parsed.value;
+                    // const state = pool.query(
                     _ = pool.query(
                         \\ INSERT INTO public.patients (
                         \\     medical_record_no,
@@ -192,7 +192,11 @@ fn on_request(r: zap.Request) void {
                         std.process.exit(1);
                     };
 
-                    std.debug.print("added user : {s}\n", .{parsed.value.name});
+                    std.debug.print("added user : <{s}>\n", .{parsed.value.name});
+                    // if (try state) {
+                    // } else {
+                    //     std.debug.print("couldn't add user");
+                    // }
                 } else |err| {
                     std.debug.print("could not parse user :( {any}\n", .{err});
                 }
@@ -213,9 +217,43 @@ fn on_request(r: zap.Request) void {
                 std.debug.print("well see sometimes things happen\n {any}\n", .{err});
                 std.process.exit(1);
             }
+        } else if (std.mem.eql(u8, the_path, "/doctor_dashboard")) {
+            if (r.sendFile("web/doctor_dashboard.html")) {
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/doc")) {
+            if (r.sendFile("web/index.html")) {
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/terms")) {
+            if (r.sendFile("web/terms.html")) {
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/logo.png")) {
+            if (r.sendFile("web/logo.png")) {
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/chatbot_interface")) {} else if (std.mem.eql(u8, the_path, "/chatbot_interface")) {
+            if (r.sendFile("web/chatbot_interface.html")) {
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, the_path, "/kanishk-testing")) {
             if (r.sendFile("web/fakenlp.html")) {
-                std.debug.print("It worked?\n", .{});
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
@@ -223,7 +261,6 @@ fn on_request(r: zap.Request) void {
             }
         } else if (std.mem.eql(u8, the_path, "/fakenlp.js")) {
             if (r.sendFile("web/fakenlp.js")) {
-                std.debug.print("It worked?\n", .{});
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
@@ -231,7 +268,6 @@ fn on_request(r: zap.Request) void {
             }
         } else if (std.mem.eql(u8, the_path, "/vocab.txt")) {
             if (r.sendFile("web/vocab.txt")) {
-                std.debug.print("It worked?\n", .{});
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
@@ -239,7 +275,6 @@ fn on_request(r: zap.Request) void {
             }
         } else if (std.mem.eql(u8, the_path, "/words.txt")) {
             if (r.sendFile("web/words.txt")) {
-                std.debug.print("It worked?\n", .{});
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
@@ -247,7 +282,6 @@ fn on_request(r: zap.Request) void {
             }
         } else if (std.mem.eql(u8, the_path, "/vectors.txt")) {
             if (r.sendFile("web/vectors.txt")) {
-                std.debug.print("It worked?\n", .{});
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
@@ -255,7 +289,7 @@ fn on_request(r: zap.Request) void {
             }
         } else {
             if (r.sendFile("web/404.html")) {
-                std.debug.print("added user\n", .{});
+                std.debug.print("404 who here?\n", .{});
                 return;
             } else |err| {
                 std.debug.print("well see sometimes things happen\n {any}\n", .{err});
