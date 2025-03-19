@@ -245,8 +245,15 @@ fn on_request(r: zap.Request) void {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
                 std.process.exit(1);
             }
-        } else if (std.mem.eql(u8, the_path, "/chatbot_interface")) {} else if (std.mem.eql(u8, the_path, "/chatbot_interface")) {
+        } else if (std.mem.eql(u8, the_path, "/chatbot_interface")) {
             if (r.sendFile("web/chatbot_interface.html")) {
+                return;
+            } else |err| {
+                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/login")) {
+            if (r.sendFile("web/login_signup.html")) {
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
