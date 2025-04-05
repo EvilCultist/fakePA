@@ -1,0 +1,3 @@
+[submodule "fakepa-server/swarup_pages"]
+	path = fakepa-server/swarup_pages
+	url = https://github.com/Ash-spec-afk/swarup_pages.git

@@ -130,15 +130,16 @@ fn on_request(r: zap.Request) void {
     }
     if (r.path) |the_path| {
         std.debug.print("PATH: {s}\n", .{the_path});
-        if (std.mem.eql(u8, the_path, "/")) {
-            // r.sendFile("chatbot.html") catch |err| std.log.err()
-            if (r.sendFile("web/doc.html")) {
-                return;
-            } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
-            }
-        } else if (std.mem.eql(u8, the_path, "api/addUser")) {
+        // if (std.mem.eql(u8, the_path, "/")) {
+        //     // r.sendFile("chatbot.html") catch |err| std.log.err()
+        //     if (r.sendFile("web/doc.html")) {
+        //         return;
+        //     } else |err| {
+        //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+        //         std.process.exit(1);
+        //     }
+        // } else if (std.mem.eql(u8, the_path, "api/addUser")) {
+        if (std.mem.eql(u8, the_path, "api/addUser")) {
             if (r.body) |the_body| {
                 std.debug.print("BODY: {s}\n", .{the_body});
                 if (std.json.parseFromSlice(
@@ -206,7 +207,7 @@ fn on_request(r: zap.Request) void {
                 // std.debug.print("added user\n", .{});
                 return;
             } else |err| {
-                std.debug.print("well see sometimes things happen\n {any}\n", .{err});
+                std.debug.print("could not serve req \n {any}\n", .{err});
                 std.process.exit(1);
             }
         } else if (std.mem.eql(u8, the_path, "api/addMessage")) {
@@ -214,28 +215,42 @@ fn on_request(r: zap.Request) void {
                 std.debug.print("added message\n", .{});
                 return;
             } else |err| {
-                std.debug.print("well see sometimes things happen\n {any}\n", .{err});
+                std.debug.print("could not serve req \n {any}\n", .{err});
                 std.process.exit(1);
             }
-        } else if (std.mem.eql(u8, the_path, "/doctor_dashboard")) {
-            if (r.sendFile("web/doctor_dashboard.html")) {
+        } else if (std.mem.eql(u8, the_path, "/")) {
+            if (r.sendFile("swarup_pages/land.html")) {
                 return;
             } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.debug.print("could not serve req \n {any}\n", .{err});
                 std.process.exit(1);
             }
-        } else if (std.mem.eql(u8, the_path, "/doc")) {
-            if (r.sendFile("web/index.html")) {
+        } else if (std.mem.eql(u8, the_path, "/login")) {
+            if (r.sendFile("swarup_pages/login_page.html")) {
                 return;
             } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/sign_up")) {
+            if (r.sendFile("swarup_pages/sign_up.html")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/chat")) {
+            if (r.sendFile("swarup_pages/chatbot_new.html")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
                 std.process.exit(1);
             }
         } else if (std.mem.eql(u8, the_path, "/terms")) {
-            if (r.sendFile("web/terms.html")) {
+            if (r.sendFile("swarup_pages/terms.html")) {
                 return;
             } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
+                std.debug.print("could not serve req \n {any}\n", .{err});
                 std.process.exit(1);
             }
         } else if (std.mem.eql(u8, the_path, "/logo.png")) {
@@ -245,61 +260,89 @@ fn on_request(r: zap.Request) void {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
                 std.process.exit(1);
             }
-        } else if (std.mem.eql(u8, the_path, "/chatbot_interface")) {
-            if (r.sendFile("web/chatbot_interface.html")) {
+        } else if (std.mem.eql(u8, the_path, "/favicon.ico")) {
+            if (r.sendFile("web/logo.png")) {
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
                 std.process.exit(1);
             }
-        } else if (std.mem.eql(u8, the_path, "/login")) {
-            if (r.sendFile("web/login_signup.html")) {
-                return;
-            } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
-            }
-        } else if (std.mem.eql(u8, the_path, "/kanishk-testing")) {
-            if (r.sendFile("web/fakenlp.html")) {
-                return;
-            } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
-            }
-        } else if (std.mem.eql(u8, the_path, "/fakenlp.js")) {
-            if (r.sendFile("web/fakenlp.js")) {
-                return;
-            } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
-            }
-        } else if (std.mem.eql(u8, the_path, "/vocab.txt")) {
-            if (r.sendFile("web/vocab.txt")) {
-                return;
-            } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
-            }
-        } else if (std.mem.eql(u8, the_path, "/words.txt")) {
-            if (r.sendFile("web/words.txt")) {
-                return;
-            } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
-            }
-        } else if (std.mem.eql(u8, the_path, "/vectors.txt")) {
-            if (r.sendFile("web/vectors.txt")) {
-                return;
-            } else |err| {
-                std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
-            }
+            // } else if (std.mem.eql(u8, the_path, "/doctor_dashboard")) {
+            //     if (r.sendFile("web/doctor_dashboard.html")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/doc")) {
+            //     if (r.sendFile("web/index.html")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/terms")) {
+            //     if (r.sendFile("web/terms.html")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/chatbot_interface")) {
+            //     if (r.sendFile("web/chatbot_interface.html")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/login")) {
+            //     if (r.sendFile("web/login_signup.html")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/kanishk-testing")) {
+            //     if (r.sendFile("web/fakenlp.html")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/fakenlp.js")) {
+            //     if (r.sendFile("web/fakenlp.js")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/vocab.txt")) {
+            //     if (r.sendFile("web/vocab.txt")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/words.txt")) {
+            //     if (r.sendFile("web/words.txt")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
+            // } else if (std.mem.eql(u8, the_path, "/vectors.txt")) {
+            //     if (r.sendFile("web/vectors.txt")) {
+            //         return;
+            //     } else |err| {
+            //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
+            //         std.process.exit(1);
+            //     }
         } else {
             if (r.sendFile("web/404.html")) {
                 std.debug.print("404 who here?\n", .{});
                 return;
             } else |err| {
-                std.debug.print("well see sometimes things happen\n {any}\n", .{err});
+                std.debug.print("could not serve req \n {any}\n", .{err});
                 std.process.exit(1);
             }
         }
