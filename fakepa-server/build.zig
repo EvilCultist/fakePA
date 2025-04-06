@@ -1,7 +1,20 @@
 const std = @import("std");
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
+
+    if (target.result.os.tag != .linux) {
+        std.debug.print("OS not supported", .{});
+        return;
+    }
+
+    // const arguments: [1]([]const u8) = .{"serve"};
+    // const arguments: [1]?[]const u8 = .{"serve"};
+    // std.os.linux.execve("ollama", arguments, null);
+    const ollama_init_args: [2][]const u8 = .{ "ollama", "serve" };
+    var ollama = std.process.Child.init(&ollama_init_args, std.heap.page_allocator);
+    try ollama.spawn();
+    // defer _ = ollama.kill();
 
     const optimize = b.standardOptimizeOption(.{});
 
