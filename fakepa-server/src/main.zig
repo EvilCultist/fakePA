@@ -98,7 +98,7 @@ pub fn main() !void {
         .log = true,
         .max_clients = 100000,
     });
-    zap.enableDebugLog();
+    // zap.enableDebugLog();
     try listener.listen();
 
     std.debug.print("Listening on 0.0.0.0:3000\n", .{});
