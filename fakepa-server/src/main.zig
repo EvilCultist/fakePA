@@ -23,14 +23,20 @@ const chat_mssg = struct {
 const new_user = struct {
     name: []const u8,
     psswd: []const u8,
+    email: []const u8,
     dob: []const u8,
     age: u8,
     gender: []const u8,
-    height: u8,
-    weight: u8,
+    height: f32,
+    weight: f32,
     habits: []const u8,
     medicalHistory: []const u8,
     allergies: []const u8,
+};
+
+const user_login = struct {
+    email: []const u8,
+    password: []const u8,
 };
 
 const n_tokens = 0;
@@ -65,7 +71,7 @@ pub fn main() !void {
         .host = "127.0.0.1",
     }, .auth = .{
         .username = "postgres",
-        .database = "postgres",
+        .database = "fakepapq",
         .timeout = 2_592_000,
     } }) catch |err| {
         std.debug.print("pg error {any}", .{err});
@@ -74,20 +80,40 @@ pub fn main() !void {
     defer pool.deinit();
 
     _ = pool.query("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";", .{}) catch |err| {
-        std.debug.print("query error {any}", .{err});
+        std.debug.print("query error added extension {any}", .{err});
         std.process.exit(1);
     };
 
-    var result = pool.query("select 4", .{}) catch |err| {
-        std.debug.print("query error {any}", .{err});
+    _ = pool.query(
+        \\ CREATE TABLE IF NOT EXISTS public.patients (
+        \\     medical_record_no UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        \\     name              TEXT NOT NULL,
+        \\     email             TEXT NOT NULL UNIQUE,
+        \\     date_of_birth     DATE NOT NULL,
+        \\     age               SMALLINT NOT NULL,
+        \\     gender            TEXT NOT NULL,
+        \\     weight            REAL NOT NULL,
+        \\     height            REAL NOT NULL,
+        \\     habits            TEXT,
+        \\     medical_history   TEXT,
+        \\     allergies         TEXT,
+        \\     password          TEXT NOT NULL
+        \\ );
+    , .{}) catch |err| {
+        std.debug.print("query error creating table {any}", .{err});
         std.process.exit(1);
     };
-    defer result.deinit();
 
-    while (try result.next()) |row| {
-        std.debug.print("{any}\n", .{row.get(i32, 0)});
-        // this is only valid until the next call to next(), deinit() or drain()
-    }
+    // var result = pool.query("select 4", .{}) catch |err| {
+    //     std.debug.print("query error {any}", .{err});
+    //     std.process.exit(1);
+    // };
+    // defer result.deinit();
+    //
+    // while (try result.next()) |row| {
+    //     std.debug.print("{any}\n", .{row.get(i32, 0)});
+    //     // this is only valid until the next call to next(), deinit() or drain()
+    // }
 
     const files: []tn = try a.alloc(stdalloc, tn, 200);
     defer a.free(stdalloc, files);
@@ -109,25 +135,45 @@ pub fn main() !void {
     });
 }
 
+fn pgPrintQuery(q: []const u8) void {
+    var result = pool.query(q, .{}) catch |err| {
+        std.debug.print("query error {any}", .{err});
+        std.process.exit(1);
+    };
+    defer result.deinit();
+
+    while (result.next() catch |err| {
+        std.debug.print("error: {any}\n", .{err});
+        return;
+    }) |row| {
+        std.debug.print("{any}\n", .{row});
+        // for (row.column_name) |val| {
+        //     std.debug.print("{s} ", val);
+        //     // std.debug.print("{s}\n", .{row.get([]const u8, i)});
+        // }
+        // std.debug.print("\n", .{});
+    }
+}
+
 fn on_request(r: zap.Request) void {
     if (r.query) |the_query| {
         std.debug.print("QUERY: {s}\n", .{the_query});
         return;
     }
-    if (r.body) |the_body| {
-        std.debug.print("BODY: {s}\n", .{the_body});
-        if (std.json.parseFromSlice(
-            chat_mssg,
-            std.heap.page_allocator,
-            the_body,
-            .{},
-        )) |parsed| {
-            std.debug.print("message: {s}\n", .{parsed.value.content});
-        } else |err| {
-            std.debug.print("no message :( {any}\n", .{err});
-        }
-        return;
-    }
+    // if (r.body) |the_body| {
+    //     std.debug.print("BODY: {s}\n", .{the_body});
+    //     if (std.json.parseFromSlice(
+    //         chat_mssg,
+    //         std.heap.page_allocator,
+    //         the_body,
+    //         .{},
+    //     )) |parsed| {
+    //         std.debug.print("message: {s}\n", .{parsed.value.content});
+    //         return;
+    //     } else |err| {
+    //         std.debug.print("no message :( {any}\n", .{err});
+    //     }
+    // }
     if (r.path) |the_path| {
         std.debug.print("PATH: {s}\n", .{the_path});
         // if (std.mem.eql(u8, the_path, "/")) {
@@ -139,7 +185,7 @@ fn on_request(r: zap.Request) void {
         //         std.process.exit(1);
         //     }
         // } else if (std.mem.eql(u8, the_path, "api/addUser")) {
-        if (std.mem.eql(u8, the_path, "api/addUser")) {
+        if (std.mem.eql(u8, the_path, "/api/addUser")) {
             if (r.body) |the_body| {
                 std.debug.print("BODY: {s}\n", .{the_body});
                 if (std.json.parseFromSlice(
@@ -149,11 +195,13 @@ fn on_request(r: zap.Request) void {
                     .{},
                 )) |parsed| {
                     const val = parsed.value;
+                    // pgPrintQuery("SELECT * FROM public.patients;");
                     // const state = pool.query(
                     _ = pool.query(
                         \\ INSERT INTO public.patients (
                         \\     medical_record_no,
                         \\     name,
+                        \\     email,
                         \\     date_of_birth,
                         \\     age,
                         \\     gender,
@@ -165,18 +213,20 @@ fn on_request(r: zap.Request) void {
                         \\     password
                         \\ )
                         \\ VALUES (
-                        \\     uuid_generate_v4(),  -- Automatically generates a UUID
-                        \\     $1  -- 'John Doe',          f the patient
-                        \\     $2  -- '1990-05-15',        f birth
-                        \\     $3  -- 35,                  f the patient
-                        \\     $4  -- 'Male',              
-                        \\     $5  -- 75.5,                 (in kilograms)
-                        \\     $6  -- 175.0,                (in centimeters)
-                        \\     $7  -- 'Non-smoker',        
-                        \\     $8  -- 'No significant history',
-                        \\     $9  -- 'Peanuts',        
-                        \\     $10 -- 'hashed_password_123'  
-                        \\ );
+                        \\     uuid_generate_v4(),
+                        \\     $1,
+                        \\     $11,
+                        \\     CAST($3 as DATE),
+                        \\     $4,
+                        \\     $5,
+                        \\     $7,
+                        \\     $6,
+                        \\     $8, 
+                        \\     $9,  
+                        \\     $10,  
+                        \\     $2 
+                        \\ )
+                        \\ ON CONFLICT (email) DO NOTHING;
                     , .{
                         val.name,
                         val.psswd,
@@ -188,9 +238,10 @@ fn on_request(r: zap.Request) void {
                         val.habits,
                         val.medicalHistory,
                         val.allergies,
+                        val.email,
                     }) catch |err| {
-                        std.debug.print("query error {any}", .{err});
-                        std.process.exit(1);
+                        std.debug.print("query error when adding user {any}", .{err});
+                        // std.process.exit(1);
                     };
 
                     std.debug.print("added user : <{s}>\n", .{parsed.value.name});
@@ -201,7 +252,12 @@ fn on_request(r: zap.Request) void {
                 } else |err| {
                     std.debug.print("could not parse user :( {any}\n", .{err});
                 }
+                // pgPrintQuery("SELECT * FROM public.patients;"); //catch |err| {
+                //     std.debug.print("error printing users table {any}", .{err});
+                // };
                 return;
+            } else {
+                std.debug.print("could not parse body to string", .{});
             }
             if (r.sendBody("user added")) {
                 // std.debug.print("added user\n", .{});
@@ -210,7 +266,72 @@ fn on_request(r: zap.Request) void {
                 std.debug.print("could not serve req \n {any}\n", .{err});
                 std.process.exit(1);
             }
-        } else if (std.mem.eql(u8, the_path, "api/addMessage")) {
+        } else if (std.mem.eql(u8, the_path, "/api/auth")) {
+            if (r.body) |the_body| {
+                std.debug.print("BODY: {s}\n", .{the_body});
+                if (std.json.parseFromSlice(
+                    user_login,
+                    std.heap.page_allocator,
+                    the_body,
+                    .{},
+                )) |parsed| {
+                    const val = parsed.value;
+                    // pgPrintQuery("SELECT * FROM public.patients;");
+                    // const state = pool.query(
+                    {
+                        // we can fetch a single row:
+                        var conn = pool.acquire() catch |err| {
+                            std.debug.print("error in getting new conn: {any}", .{err});
+                            std.process.exit(1);
+                        };
+                        defer conn.release();
+
+                        var row = (conn.row(
+                            \\ SELECT name
+                            \\ FROM public.patients
+                            \\ WHERE email = '$1' AND password = '$2';
+                        , .{
+                            val.email,
+                            val.password,
+                        }) catch {
+                            return;
+                        }) orelse unreachable;
+                        defer row.deinit() catch {};
+
+                        const name = row.get([]const u8, 0);
+                        std.debug.print("logged in: {s}", .{name});
+                    }
+                    _ = pool.query(
+                        \\ 
+                    , .{
+                        val.email,
+                        val.password,
+                    }) catch |err| {
+                        std.debug.print("query error when adding user {any}", .{err});
+                        std.process.exit(1);
+                    };
+                    // if (try state) {
+                    // } else {
+                    //     std.debug.print("couldn't add user");
+                    // }
+                } else |err| {
+                    std.debug.print("could not parse user :( {any}\n", .{err});
+                }
+                // pgPrintQuery("SELECT * FROM public.patients;"); //catch |err| {
+                //     std.debug.print("error printing users table {any}", .{err});
+                // };
+                return;
+            } else {
+                std.debug.print("could not parse body to string", .{});
+            }
+            if (r.sendBody("")) {
+                std.debug.print("added message\n", .{});
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/api/addMessage")) {
             if (r.sendBody("")) {
                 std.debug.print("added message\n", .{});
                 return;
@@ -220,6 +341,62 @@ fn on_request(r: zap.Request) void {
             }
         } else if (std.mem.eql(u8, the_path, "/")) {
             if (r.sendFile("swarup_pages/land.html")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/England.jpeg")) {
+            if (r.sendFile("swarup_pages/England.jpeg")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/arabia.jpeg")) {
+            if (r.sendFile("swarup_pages/arabia.jpeg")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/china.jpeg")) {
+            if (r.sendFile("swarup_pages/china.jpeg")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/france.jpeg")) {
+            if (r.sendFile("swarup_pages/france.jpeg")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/germany.jpeg")) {
+            if (r.sendFile("swarup_pages/germany.jpeg")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/india.jpeg")) {
+            if (r.sendFile("swarup_pages/india.jpeg")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/japan.jpeg")) {
+            if (r.sendFile("swarup_pages/japan.jpeg")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/spain.jpeg")) {
+            if (r.sendFile("swarup_pages/spain.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
