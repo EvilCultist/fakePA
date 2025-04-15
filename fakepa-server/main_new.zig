@@ -39,12 +39,8 @@ const user_login = struct {
     password: []const u8,
 };
 
-pub fn makeAuthToken() []const u8 {
-    return "yohoho";
-}
-
 const Lookup = struct {
-    pub fn get(self: *Lookup, val: []const u8) []const u8 {
+    pub fn get(val: []const u8) []const u8 {
         var conn = pool.acquire() catch |err| {
             std.debug.print("error in getting new conn: {any}", .{err});
             std.process.exit(1);
@@ -52,7 +48,7 @@ const Lookup = struct {
         defer conn.release();
 
         var row = (conn.row(
-            \\ SELECT email
+            \\ SELECT uuid
             \\ FROM public.tokens
             \\ WHERE token = $1;
         , .{
@@ -63,9 +59,9 @@ const Lookup = struct {
         });
         defer row.deinit() catch {};
 
-        // const name = row.get([]const u8, 0);
+        const name = row.get([]const u8, 0);
         // std.debug.print("logged in: {s}\n", .{name});
-        return row.get([]const u8, 0);
+        return name;
     }
 };
 
@@ -110,16 +106,33 @@ pub fn main() !void {
     defer pool.deinit();
 
     {
-        _ = pool.query(
-            \\ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        // var conn = pool.acquire() catch |err| {
+        //     std.debug.print("error in getting new conn: {any}", .{err});
+        //     std.process.exit(1);
+        // };
+        // defer conn.release();
+
+        // var row = (conn.row(
+        // _ = (conn.exec(
+        _ = pool.exec(
+            \\ CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";
         , .{}) catch |err| {
             std.debug.print("query error added extension {any}", .{err});
             std.process.exit(1);
         };
+        // defer row.deinit() catch {};
     }
 
+    // _ = pool.exec
+
     {
-        _ = pool.query(
+        var conn = pool.acquire() catch |err| {
+            std.debug.print("error in getting new conn: {any}", .{err});
+            std.process.exit(1);
+        };
+        defer conn.release();
+
+        var row = (conn.row(
             \\ CREATE TABLE IF NOT EXISTS public.patients (
             \\     medical_record_no UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             \\     name              TEXT NOT NULL,
@@ -137,32 +150,51 @@ pub fn main() !void {
         , .{}) catch |err| {
             std.debug.print("query error creating table {any}", .{err});
             std.process.exit(1);
-        };
+        }) orelse unreachable;
+        defer row.deinit() catch {};
     }
 
     {
-        _ = pool.query(
+        var conn = pool.acquire() catch |err| {
+            std.debug.print("error in getting new conn: {any}\n", .{err});
+            std.process.exit(1);
+        };
+        defer conn.release();
+
+        // Drop the existing table if it exists
+        var drop_row = (conn.row(
             \\ DROP TABLE IF EXISTS public.tokens;
         , .{}) catch |err| {
             std.debug.print("query error dropping table: {any}\n", .{err});
             std.process.exit(1);
-        };
+        }) orelse unreachable;
+        defer drop_row.deinit() catch {};
 
-        _ = pool.query(
-            // \\ CREATE TABLE public.tokens (
-            // \\     uuid UUID PRIMARY KEY,
-            // \\     token TEXT NOT NULL
-            // \\ );
-            // \\
-            \\ CREATE TABLE IF NOT EXISTS public.tokens (
-            \\     email TEXT PRIMARY KEY REFERENCES public.patients(email) ON DELETE CASCADE,
+        // Create the new table
+        var create_row = (conn.row(
+            \\ CREATE TABLE public.tokens (
+            \\     uuid UUID PRIMARY KEY,
             \\     token TEXT NOT NULL
             \\ );
         , .{}) catch |err| {
             std.debug.print("query error creating table: {any}\n", .{err});
             std.process.exit(1);
-        };
+        }) orelse unreachable;
+        defer create_row.deinit() catch {};
     }
+
+    // var result = pool.query("select 4", .{}) catch |err| {
+    //     std.debug.print("query error {any}", .{err});
+    //     std.process.exit(1);
+    // };
+    // defer result.deinit();
+    //
+    // while (try result.next()) |row| {
+    //     std.debug.print("{any}\n", .{row.get(i32, 0)});
+    //     // this is only valid until the next call to next(), deinit() or drain()
+    // }
+
+    // if (zap.Auth.BearerSingle. |auth|
 
     const files: []tn = try a.alloc(stdalloc, tn, 200);
     defer a.free(stdalloc, files);
@@ -341,7 +373,6 @@ fn on_request(r: zap.Request) void {
                     const val = parsed.value;
                     // pgPrintQuery("SELECT * FROM public.patients;");
                     // const state = pool.query(
-                    var name: ?[]const u8 = null;
                     {
                         var conn = pool.acquire() catch |err| {
                             std.debug.print("error in getting new conn: {any}", .{err});
@@ -362,38 +393,8 @@ fn on_request(r: zap.Request) void {
                         }) orelse unreachable;
                         defer row.deinit() catch {};
 
-                        name = row.get([]const u8, 0);
-                    }
-                    {
-                        var conn = pool.acquire() catch |err| {
-                            std.debug.print("error in getting new conn: {any}", .{err});
-                            std.process.exit(1);
-                        };
-                        defer conn.release();
-                        const token = makeAuthToken();
-                        _ = (conn.query(
-                            \\ 
-                            \\ INSERT INTO public.tokens (email, token)
-                            \\ VALUES ($1, $2);
-                        , .{
-                            val.email,
-                            token,
-                        }) catch |err| {
-                            std.debug.print("pg error in adding token to db: {any}", .{err});
-                            std.process.exit(1);
-                        });
-                        std.debug.print("logged in: {s}\n", .{name.?});
-                        r.sendJson(
-                            \\ {
-                            \\ .access_token = token,
-                            \\ .token_type = "Bearer",
-                            \\ .expires_in = 3600, // one hour
-                            \\ .user_id = name,
-                            \\ }
-                        ) catch |err| {
-                            std.debug.print("error returning json: {any}", .{err});
-                            std.process.exit(1);
-                        };
+                        const name = row.get([]const u8, 0);
+                        std.debug.print("logged in: {s}\n", .{name});
                     }
                     // _ = pool.query(
                     //     \\
