@@ -104,6 +104,12 @@ var pool: *pg.Pool = undefined;
 var Auth: ?zap.Auth.BearerMulti(Lookup) = null;
 
 pub fn main() !void {
+    const ollama_init_args: [2][]const u8 = .{ "ollama", "serve" };
+    var ollama = std.process.Child.init(&ollama_init_args, std.heap.page_allocator);
+    try ollama.spawn();
+    defer _ = ollama.kill() catch |err| {
+        std.debug.print("error killing ollama {any}", .{err});
+    };
     pool = pg.Pool.init(stdalloc, .{ .size = 80, .connect = .{
         .port = 5432,
         .host = "127.0.0.1",
@@ -121,7 +127,7 @@ pub fn main() !void {
 
     // Auth = zap.Auth.BearerMulti(Lookup).init(stdalloc, &lk, null);
     // const Auth = try zap.Auth.BearerMulti.init(stdalloc, Lookup, null);
-    defer Auth.?.deinit();
+    // defer Auth.?.deinit();
 
     {
         _ = pool.query(
@@ -393,15 +399,26 @@ fn on_request(r: zap.Request) void {
                             std.debug.print("pg error in adding token to db: {any}", .{err});
                             std.process.exit(1);
                         });
+                        // \\ {
+                        // \\ .access_token = token,
+                        // \\ .token_type = "Bearer",
+                        // \\ .expires_in = 3600, // one hour
+                        // \\ .user_id = name,
+                        // \\ }
                         std.debug.print("logged in: {s}\n", .{name.?});
-                        r.sendJson(
-                            \\ {
-                            \\ .access_token = token,
-                            \\ .token_type = "Bearer",
-                            \\ .expires_in = 3600, // one hour
-                            \\ .user_id = name,
-                            \\ }
-                        ) catch |err| {
+                        const json: []const u8 = std.fmt.allocPrint(stdalloc,
+                            \\ {{
+                            \\ "access_token" : "{s}",
+                            \\ "token_type" : "Bearer",
+                            \\ "expires_in" : 3600, // one hour
+                            \\ "user_id" : "name"
+                            \\ }}
+                        , .{token}) catch |err| {
+                            std.debug.print("error returning json: {any}", .{err});
+                            std.process.exit(1);
+                        };
+
+                        r.sendJson(json) catch |err| {
                             std.debug.print("error returning json: {any}", .{err});
                             std.process.exit(1);
                         };
@@ -444,6 +461,127 @@ fn on_request(r: zap.Request) void {
                 std.debug.print("could not serve req \n {any}\n", .{err});
                 std.process.exit(1);
             }
+        } else if (std.mem.eql(u8, the_path, "/api/getPatients")) {
+            var conn = pool.acquire() catch |err| {
+                std.debug.print("error in getting new conn: {any}", .{err});
+                std.process.exit(1);
+            };
+            defer conn.release();
+
+            var row = (conn.row(
+                \\ SELECT *
+                \\ FROM public.patients
+            , .{}) catch |err| {
+                std.debug.print("pg error in checking auth: {any}", .{err});
+                std.process.exit(1);
+            }) orelse unreachable;
+            defer row.deinit() catch {};
+
+            // const medical_record_no: []const u8 = row.get([]const u8, 0);
+            const name: []const u8 = row.get([]const u8, 1);
+            const email: []const u8 = row.get([]const u8, 2);
+            // const date_of_birth: []const u8 = row.get([]const u8, 3);
+            const age: i16 = row.get(i16, 4);
+            const gender: []const u8 = row.get([]const u8, 5);
+            const weight: f32 = row.get(f32, 6);
+            const height: f32 = row.get(f32, 7);
+            const habits: []const u8 = row.get([]const u8, 8);
+            const medical_history: []const u8 = row.get([]const u8, 9);
+            const allergies: []const u8 = row.get([]const u8, 10);
+            // const json: []const u8 = "{";
+            // const json = std.ArrayList(u8).init(stdalloc);
+            // defer json.deinit();
+            // var i: u32 = 0;
+            const i: u32 = 0;
+            // while (true) {
+            // json += std.fmt.allocPrint(stdalloc, "{{ \"{d}\": ", .{i}) catch {
+            //     unreachable;
+            // };
+            // json += std.fmt.allocPrint(stdalloc,
+            const json: []const u8 = std.fmt.allocPrint(stdalloc,
+                // \\{{"name":"{s}","token_type":"Bearer","expires_in":3600,"user_id":"{s}"}}
+                \\ {{
+                // \\ "medical_record_no" : "{s}",
+                \\ "medical_record_no" : "{any}",
+                \\ "name" : "{s}",
+                \\ "email" : "{s}",
+                \\ "date_of_birth" : "{s}",
+                \\ "age": "{d}",
+                \\ "gender": "{s}",
+                \\ "weight": "{}",
+                \\ "height": "{}",
+                \\ "habits": "{s}",
+                \\ "medical_history": "{s}",
+                \\ "allergies": "{s}"
+                \\ }}
+            , .{
+                i,
+                name,
+                email,
+                // date_of_birth,
+                "2025-02-3",
+                age,
+                gender,
+                weight,
+                height,
+                habits,
+                medical_history,
+                allergies,
+            }) catch |err| {
+                std.debug.print("error returning json: {any}", .{err});
+                std.process.exit(1);
+            };
+            //     i += 1;
+            //     if (row.next()) {
+            //         json += ",\n";
+            //         continue;
+            //     } else {
+            //         json += "}";
+            //         break;
+            //     }
+            // }
+
+            // std.debug.print(
+            //     \\ {{
+            //     \\ "medical_record_no" : "{s}",
+            //     \\ "name" : "{s}",
+            //     \\ "email" : "{s}",
+            //     \\ "date_of_birth" : "{s}",
+            //     \\ "age            ": "{d}",
+            //     \\ "gender         ": "{s}",
+            //     \\ "weight         ": "{}",
+            //     \\ "height         ": "{}",
+            //     \\ "habits         ": "{s}",
+            //     \\ "medical_history": "{s}",
+            //     \\ "allergies      ": "{s}",
+            //     \\ }}
+            //     \\
+            // , .{
+            //     medical_record_no,
+            //     name,
+            //     email,
+            //     date_of_birth,
+            //     age,
+            //     gender,
+            //     weight,
+            //     height,
+            //     habits,
+            //     medical_history,
+            //     allergies,
+            // });
+
+            r.sendJson(json) catch |err| {
+                std.debug.print("pg error in checking auth: {any}", .{err});
+                std.process.exit(1);
+            };
+            return;
+            // if (r.sendBody("")) {
+            //     std.debug.print("added message\n", .{});
+            //     return;
+            // } else |err| {
+            //     std.debug.print("could not serve req \n {any}\n", .{err});
+            //     std.process.exit(1);
+            // }
         } else if (std.mem.eql(u8, the_path, "/")) {
             if (r.sendFile("swarup_pages/land.html")) {
                 return;
@@ -535,6 +673,34 @@ fn on_request(r: zap.Request) void {
             }
         } else if (std.mem.eql(u8, the_path, "/terms")) {
             if (r.sendFile("swarup_pages/terms.html")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/vectors.txt")) {
+            if (r.sendFile("swarup_pages/vectors.txt")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/words.txt")) {
+            if (r.sendFile("swarup_pages/words.txt")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/admin_dashboard")) {
+            if (r.sendFile("swarup_pages/admin_dashboard.html")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
+        } else if (std.mem.eql(u8, the_path, "/doctor_dashboard")) {
+            if (r.sendFile("swarup_pages/doctor_dashboard.html")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
