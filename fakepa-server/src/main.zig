@@ -44,7 +44,7 @@ pub fn makeAuthToken() []const u8 {
 }
 
 const Lookup = struct {
-    pub fn get(self: *Lookup, val: []const u8) []const u8 {
+    pub fn get(_: *Lookup, val: []const u8) []const u8 {
         var conn = pool.acquire() catch |err| {
             std.debug.print("error in getting new conn: {any}", .{err});
             std.process.exit(1);
@@ -61,11 +61,18 @@ const Lookup = struct {
             std.debug.print("pg error in checking auth: {any}", .{err});
             std.process.exit(1);
         });
-        defer row.deinit() catch {};
+        defer row.?.deinit() catch {};
 
         // const name = row.get([]const u8, 0);
         // std.debug.print("logged in: {s}\n", .{name});
-        return row.get([]const u8, 0);
+        return row.?.get([]const u8, 0);
+    }
+    pub fn contains(self: *Lookup, val: []const u8) bool {
+        if (std.mem.eql(u8, self.get(val), "")) {
+            return false;
+        } else {
+            return true;
+        }
     }
 };
 
@@ -94,6 +101,7 @@ const n_tokens = 0;
 // }
 
 var pool: *pg.Pool = undefined;
+var Auth: ?zap.Auth.BearerMulti(Lookup) = null;
 
 pub fn main() !void {
     pool = pg.Pool.init(stdalloc, .{ .size = 80, .connect = .{
@@ -108,6 +116,12 @@ pub fn main() !void {
         std.process.exit(1);
     };
     defer pool.deinit();
+
+    // var lk = Lookup{};
+
+    // Auth = zap.Auth.BearerMulti(Lookup).init(stdalloc, &lk, null);
+    // const Auth = try zap.Auth.BearerMulti.init(stdalloc, Lookup, null);
+    defer Auth.?.deinit();
 
     {
         _ = pool.query(
@@ -149,11 +163,6 @@ pub fn main() !void {
         };
 
         _ = pool.query(
-            // \\ CREATE TABLE public.tokens (
-            // \\     uuid UUID PRIMARY KEY,
-            // \\     token TEXT NOT NULL
-            // \\ );
-            // \\
             \\ CREATE TABLE IF NOT EXISTS public.tokens (
             \\     email TEXT PRIMARY KEY REFERENCES public.patients(email) ON DELETE CASCADE,
             \\     token TEXT NOT NULL
@@ -213,6 +222,8 @@ fn on_request(r: zap.Request) void {
     // if (r.getCookieStr(stdalloc, "auth")) |cookie| {
     //     auth = cookie;
     // }
+
+    // const auth = Auth.?.authenticateRequest(&r);
 
     // if (r.body) |the_body| {
     //     std.debug.print("BODY: {s}\n", .{the_body});
@@ -511,6 +522,11 @@ fn on_request(r: zap.Request) void {
                 std.process.exit(1);
             }
         } else if (std.mem.eql(u8, the_path, "/chat")) {
+            // if (auth == .AuthOK) {
+            //     r.redirectTo("/login", .ok) catch |err| {
+            //         std.debug.print("error redirecting : {any}", .{err});
+            //     };
+            // }
             if (r.sendFile("swarup_pages/chatbot_new.html")) {
                 return;
             } else |err| {
