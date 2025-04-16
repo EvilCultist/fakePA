@@ -16,7 +16,8 @@ const tn = struct {
 const Role = enum { user, admin, doctor };
 
 const chat_mssg = struct {
-    role: Role,
+    // role: Role,
+    email: []const u8,
     content: []const u8,
 };
 
@@ -156,6 +157,18 @@ pub fn main() !void {
             \\ );
         , .{}) catch |err| {
             std.debug.print("query error creating table {any}", .{err});
+            std.process.exit(1);
+        };
+    }
+
+    {
+        _ = pool.query(
+            \\ CREATE TABLE IF NOT EXISTS public.messages (
+            \\     email TEXT PRIMARY KEY REFERENCES public.patients(email) ON DELETE CASCADE,
+            \\     token TEXT NOT NULL
+            \\ );
+        , .{}) catch |err| {
+            std.debug.print("query error creating table: {any}\n", .{err});
             std.process.exit(1);
         };
     }
@@ -454,12 +467,62 @@ fn on_request(r: zap.Request) void {
                 std.process.exit(1);
             }
         } else if (std.mem.eql(u8, the_path, "/api/addMessage")) {
-            if (r.sendBody("")) {
-                std.debug.print("added message\n", .{});
-                return;
+            if (std.json.parseFromSlice(
+                chat_mssg,
+                std.heap.page_allocator,
+                r.body.?,
+                .{},
+            )) |parsed| {
+                std.debug.print("think - {any}\n", .{parsed});
+                const val = parsed.value;
+                // var name: []const u8 = undefined;
+                // {
+                //     var conn = pool.acquire() catch |err| {
+                //         std.debug.print("error in getting new conn: {any}", .{err});
+                //         std.process.exit(1);
+                //     };
+                //     defer conn.release();
+                //
+                //     var row = (conn.row(
+                //         \\ SELECT name
+                //         \\ FROM public.patients
+                //         \\ WHERE email = $1 AND password = $2;
+                //     , .{
+                //         val.email,
+                //         val.password,
+                //     }) catch |err| {
+                //         std.debug.print("pg error in checking auth: {any}", .{err});
+                //         std.process.exit(1);
+                //     }) orelse unreachable;
+                //     defer row.deinit() catch {};
+                //
+                //     name = row.get([]const u8, 0);
+                // }
+                {
+                    var conn = pool.acquire() catch |err| {
+                        std.debug.print("error in getting new conn: {any}", .{err});
+                        std.process.exit(1);
+                    };
+                    defer conn.release();
+
+                    _ = (conn.query(
+                        \\ INSERT INTO public.messages (email, content)
+                        \\ VALUES ($1, $2);
+                    , .{
+                        val.email,
+                        val.content,
+                    }) catch |err| {
+                        std.debug.print("pg error in adding token to db: {any}", .{err});
+                        std.process.exit(1);
+                    });
+
+                    r.sendBody("Ok") catch |err| {
+                        std.debug.print("error returning json: {any}", .{err});
+                        std.process.exit(1);
+                    };
+                }
             } else |err| {
-                std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                std.debug.print("could not parse user :( {any}\n", .{err});
             }
         } else if (std.mem.eql(u8, the_path, "/api/getPatients")) {
             var conn = pool.acquire() catch |err| {
