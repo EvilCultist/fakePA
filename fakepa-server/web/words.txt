@@ -30,9 +30,9 @@ shock
 bleeding spotting vagina period 
 period occur le 28 day apart 35 day apart
 time period change month 
-heavier bleeding 
-bleeding last day normal 7 day 
-tenderness dryness vagina 
+heavier bleeding
+bleeding last day normal 7 day
+tenderness dryness vagina
 hot flash 
 mood swing 
 shallow breathing 
@@ -391,7 +391,7 @@ painful hardened tissue area anus
 tenderness in anus swollen part 
 intense fear gaining weight becoming fat 
 refuse keep weight considered normal age height  
-ha body image distorted 
+has body image distorted
 is focused body weight shape 
 refuse admit danger weight loss 
 cutting food small piece moving around plate instead eating 
@@ -429,7 +429,7 @@ blurred vision
 brain damage low oxygen level 
 burn skin 
 irritation skin 
-hole  skin tissue underneath 
+hole skin tissue underneath
 bruising bleeding skin 
 apathy  
 slowdown stoppage bowel 
@@ -520,7 +520,7 @@ cough without sputum  production
 pulling skin rib breathing  
 abnormal breathing pattern  
 bluish color lip face  
-decreased coordination movement  late childhood include ataxic gait  
+decreased coordination movement late childhood include ataxic gait
 jerky gait 
 unsteadiness 
 decreasing mental development slows stop age 10 12 
@@ -547,13 +547,13 @@ breathing difficulty lying flat
 breathing difficulty asleep 
 symptom due embolism tumor material 
 bluish skin especially finger  
-curvature nail accompanied soft tissue swelling  finger 
+curvature nail accompanied soft tissue swelling finger
 finger change color upon pressure cold stress 
-doesn't pay attention detail make careless mistake 
+does not pay attention detail make careless mistake
 ha problem focusing task play 
-doesn't listen spoken directly 
-doesn't follow instruction finish schoolwork chore 
-ha problem organizing task activity 
+does not listen spoken directly
+does not follow instruction finish schoolwork chore
+has problem organizing task activity
 avoids like task require mental effort 
 often loses thing 
 easily distracted 
@@ -565,7 +565,7 @@ ha problem playing working quietly
 is often go 
 act driven motor 
 talk time 
-ha problem awaiting turn 
+has problem awaiting turn
 interrupt intrudes others 
 be sensitive sight 
 be sensitive hearing 
@@ -575,37 +575,37 @@ be sensitive taste
 be upset routine changed 
 repeat body movement over 
 be unusually attached thing 
-can't start maintain conversation 
+cannot start maintain conversation
 us gesture instead word 
 develops language slowly all 
-doesn't adjust gaze look object others looking at 
-doesn't refer self right way 
-doesn't point show people object 
+does not adjust gaze look object others looking at
+does not refer self right way
+does not point show people object
 repeat word memorized passage commercial 
-doesn't make friend 
-doesn't play interactive game 
+does not make friend
+does not play interactive game
 is withdrawn social activity 
 may respond eye contact smile 
 or may avoid eye contact 
 may treat others object 
 prefers alone rather others 
-isn't able show empathy 
-doesn't startle loud noise 
-ha high low sens sight 
-ha high low sens hearing 
-ha high low sens touch 
-ha high low sens smell 
-ha high low sens taste 
+is not able show empathy
+does not startle loud noise
+has high low sense sight
+has high low sense hearing
+has high low sense touch
+has high low sense smell
+has high low sense taste
 may find normal noise painful hold hand ear 
 may withdraw physical contact stimulating overwhelming 
 rub surface mouth lick object 
 may high low response pain 
-doesn't imitate action others 
+does not imitate action others
 prefers solitary ritualistic play 
 show little pretend imaginative play 
 act intense tantrum 
 get stuck single topic task 
-ha short attention span 
+has short attention span
 is overactive passive 
 is aggressive toward others self 
 show strong need thing same 
@@ -735,7 +735,7 @@ sign uti
 black tarry stool 
 symptom chronic liver disease 
 intense fear abandoned 
-can't tolerate alone 
+cannot tolerate alone
 feeling emptiness boredom 
 display inappropriate anger 
 impulsiveness substance use sexual relationship 
@@ -825,7 +825,7 @@ cannot move eye particular direction
 decreased appetite  
 diarrhea either constant 
 lactose intolerance 
-often go away treatment) 
+often go away treatment
 stool foul smelling oily stick toilet flushed 
 fever chill sweating 
 pain tenderness affected area 
@@ -885,7 +885,7 @@ the blister often first seen face middle body scalp day two blister become cloud
 muscle pain 
 discharge penis rectum 
 tenderness pain testicle 
-rectal discharge pain 
+rectal discharge pain
 symptom pelvic inflammatory disease  
 salpingitis  
 or liver inflammation similar hepatitis 
@@ -909,9 +909,9 @@ sharp cramping dull pain upper right upper middle belly lasting 30 minute
 problem walking due weakness lack feeling foot 
 trouble using arm hand leg foot due weakness 
 sensation change numbness decreased sensation pain burning tingling abnormal sensation 
-then arm hands) 
+then arm hands
 enlarged lymph node liver spleen 
-infection keep coming back  despite treatment 
+infection keep coming back despite treatment
 excessive blinking 
 grimace face 
 quick movement arm 
@@ -943,7 +943,7 @@ abdominal pain due pancreatitis
 symptom nerve damage loss feeling foot leg memory loss 
 yellow deposit fatty material skin called xanthoma growth may appear back buttock sol foot ankle knee elbow 
 small red spider like blood vessel skin 
-fluid buildup leg  abdomen  
+fluid buildup leg abdomen
 redness palm hand 
 men impotence shrinking testicle breast swelling
 easy bruising abnormal bleeding 
@@ -957,7 +957,7 @@ short forearm
 short finger 
 short stature 
 increased risk getting flat foot 
-abnormal curvature spine  knee deformity 
+abnormal curvature spine knee deformity
 high risk hearing loss due infection 
 increased risk fracture due decreased bone density 
 blind spot 
@@ -991,7 +991,7 @@ skin slowly becomes blotchy purple pale red thin shiny swollen sweaty
 acting somewhat confused 
 feeling unable concentrate thinking clearly 
 being drowsy hard wake similar change 
-memory loss  event injury right after 
+memory loss event injury right after
 seeing flashing light 
 light sensitivity 
 feeling like lost time 
@@ -1006,7 +1006,7 @@ running away
 vandalizing destroying property 
 an infant seem visually aware world around  
 gray white cloudiness pupil  
-the red eye glow  pupil missing photo different 2 eye 
+the red eye glow pupil missing photo different 2 eye
 unusual rapid eye movement  
 inflammation retina 
 low birth weight 
@@ -1029,7 +1029,7 @@ pressure damage optic nerve
 dementia get worse quickly week month 
 change gait  
 feeling nervous 
-feeling need pas stool even though bowel already empty  may involve straining pain cramping 
+feeling need pas stool even though bowel already empty may involve straining pain cramping
 glomerulonephritis  
 purpura 
 skin death 
@@ -1046,7 +1046,7 @@ enlarged lymph node especially neck
 skin feel warm touch 
 dry sticky mouth 
 change alertness  
-change feeling  perception 
+change feeling perception
 decrease short term memory recall 
 disorganized thinking talking way make sense 
 emotional personality change anger agitation depression irritability overly happy 
@@ -1090,7 +1090,7 @@ problem visual fine motor coordination
 hunger 
 chest pain pressure  
 swelling ankle 
-croup like  cough 
+croup like cough
 bloody watery drainage nose 
 difficulty getting standing 
 increased curvature back 
@@ -1233,15 +1233,15 @@ inability feel pain change temperature
 unusually smooth 
 pale tongue surface lack taste bud decrease sense taste 
 cramping one calf walking 
-chest pain  sign coronary artery disease may present young age 
+chest pain sign coronary artery disease may present young age
 sudden stroke like symptom trouble speaking drooping one side face weakness arm leg loss balance 
 stroke 
 high triglyceride level blood 
 chronic inflammation pancreas 
-skin sore  red swollen range 5 20 cm diameter 
+skin sore red swollen range 5 20 cm diameter
 eye strain 
 headache reading 
-leakage liquid sudden episode watery diarrhea someone chronic  constipation 
+leakage liquid sudden episode watery diarrhea someone chronic constipation
 rectal bleeding 
 small semi formed stool 
 straining trying pas stool 
@@ -1253,8 +1253,8 @@ breast feel full swollen heavy
 pain discomfort arm 
 breast lump change size menstrual period 
 bone sore  
-hormone  problem 
-unusual skin color  occurs mccune albright syndrome 
+hormone problem
+unusual skin color occurs mccune albright syndrome
 pigmentation 
 flushed face 
 swelling called generalized edema fluid held body 
@@ -1374,7 +1374,7 @@ having low tolerance frustration delayed gratification
 needing center attention  
 quickly changing emotion may seem shallow others 
 intestinal infection 
-swelling surface skin red skin colored welt  clearly defined edge 
+swelling surface skin red skin colored welt clearly defined edge
 wheal may get bigger spread join together form larger area flat raised skin 
 wheal often change shape disappear reappear within minute hour 
 it unusual wheal last 48 hour 
@@ -1398,7 +1398,7 @@ vertigo
 nausea
 vomiting
 one sided neck ear pain 
-overreaction involuntary  nervous system stimulation  
+overreaction involuntary nervous system stimulation
 behavioral disturbance 
 moodiness 
 paranoia 
@@ -1446,8 +1446,8 @@ slight pinkness may seen around bump
 bump may appear face mistaken acne 
 pain may felt belly area side back 
 pain may move groin area  
-testicle  men 
-labium  woman 
+testicle men
+labium woman
 urethra underside penis 
 testicle moved scrotum 
 being slow sit walk crawl speak 
