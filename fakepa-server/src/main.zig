@@ -19,6 +19,7 @@ const chat_mssg = struct {
     // role: Role,
     email: []const u8,
     content: []const u8,
+    symptoms: []const u8,
 };
 
 const new_user = struct {
@@ -165,6 +166,7 @@ pub fn main() !void {
         _ = pool.query(
             \\ CREATE TABLE IF NOT EXISTS public.messages (
             \\     email TEXT PRIMARY KEY REFERENCES public.patients(email) ON DELETE CASCADE,
+            \\     symptoms TEXT,
             \\     token TEXT NOT NULL
             \\ );
         , .{}) catch |err| {
@@ -645,6 +647,13 @@ fn on_request(r: zap.Request) void {
             //     std.debug.print("could not serve req \n {any}\n", .{err});
             //     std.process.exit(1);
             // }
+        } else if (std.mem.eql(u8, the_path, "/api/translate")) {
+            if (r.sendFile("swarup_pages/land.html")) {
+                return;
+            } else |err| {
+                std.debug.print("could not serve req \n {any}\n", .{err});
+                std.process.exit(1);
+            }
         } else if (std.mem.eql(u8, the_path, "/")) {
             if (r.sendFile("swarup_pages/land.html")) {
                 return;
