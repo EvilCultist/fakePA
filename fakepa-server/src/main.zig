@@ -563,38 +563,60 @@ fn on_request(r: zap.Request) void {
             //     unreachable;
             // };
             // json += std.fmt.allocPrint(stdalloc,
-            const json: []const u8 = std.fmt.allocPrint(stdalloc,
-                // \\{{"name":"{s}","token_type":"Bearer","expires_in":3600,"user_id":"{s}"}}
-                \\ {{
-                // \\ "medical_record_no" : "{s}",
-                \\ "medical_record_no" : "{any}",
-                \\ "name" : "{s}",
-                \\ "email" : "{s}",
-                \\ "date_of_birth" : "{s}",
-                \\ "age": "{d}",
-                \\ "gender": "{s}",
-                \\ "weight": "{}",
-                \\ "height": "{}",
-                \\ "habits": "{s}",
-                \\ "medical_history": "{s}",
-                \\ "allergies": "{s}"
-                \\ }}
-            , .{
-                i,
-                name,
-                email,
-                // date_of_birth,
-                "2025-02-3",
-                age,
-                gender,
-                weight,
-                height,
-                habits,
-                medical_history,
-                allergies,
-            }) catch |err| {
-                std.debug.print("error returning json: {any}", .{err});
-                std.process.exit(1);
+            // const json: []const u8 = std.fmt.allocPrint(stdalloc,
+            //     // \\{{"name":"{s}","token_type":"Bearer","expires_in":3600,"user_id":"{s}"}}
+            //     \\ {{
+            //     // \\ "medical_record_no" : "{s}",
+            //     \\ "medical_record_no" : "{any}",
+            //     \\ "name" : "{s}",
+            //     \\ "email" : "{s}",
+            //     \\ "date_of_birth" : "{s}",
+            //     \\ "age": "{d}",
+            //     \\ "gender": "{s}",
+            //     \\ "weight": "{}",
+            //     \\ "height": "{}",
+            //     \\ "habits": "{s}",
+            //     \\ "medical_history": "{s}",
+            //     \\ "allergies": "{s}"
+            //     \\ }}
+            // , .{
+            //     i,
+            //     name,
+            //     email,
+            //     "2025-02-3",
+            //     age,
+            //     gender,
+            //     weight,
+            //     height,
+            //     habits,
+            //     medical_history,
+            //     allergies,
+            // }) catch |err| {
+            //     std.debug.print("error returning json: {any}", .{err});
+            //     std.process.exit(1);
+            // };
+
+            var json = std.ArrayList(u8).init(stdalloc);
+            defer json.deinit();
+            _ = std.json.stringify(
+                .{
+                    // \\ "medical_record_no" = "{s}",
+                    .medical_record_no = i,
+                    .name = name,
+                    .email = email,
+                    .date_of_birth = "2025-02-3",
+                    .age = age,
+                    .gender = gender,
+                    .weight = weight,
+                    .height = height,
+                    .habits = habits,
+                    .medical_history = medical_history,
+                    .allergies = allergies,
+                },
+                .{},
+                json.writer(),
+            ) catch |err| {
+                std.debug.print("no json proper sad sad cry : \n {any}", .{err});
             };
             //     i += 1;
             //     if (row.next()) {
@@ -635,7 +657,7 @@ fn on_request(r: zap.Request) void {
             //     allergies,
             // });
 
-            r.sendJson(json) catch |err| {
+            r.sendJson(json.items) catch |err| {
                 std.debug.print("pg error in checking auth: {any}", .{err});
                 std.process.exit(1);
             };
@@ -648,7 +670,46 @@ fn on_request(r: zap.Request) void {
             //     std.process.exit(1);
             // }
         } else if (std.mem.eql(u8, the_path, "/api/translate")) {
-            if (r.sendFile("swarup_pages/land.html")) {
+            var json = std.ArrayList(u8).init(stdalloc);
+            var response = std.ArrayList(u8).init(stdalloc);
+            defer json.deinit();
+            defer response.deinit();
+            _ = std.json.stringify(
+                .{
+                    .source = "auto",
+                    .target = "en",
+                    .text = r.body.?,
+                    // .proxies = &[_]std.json.Value{},
+                },
+                .{},
+                json.writer(),
+            ) catch |err| {
+                std.debug.print("{any}", .{err});
+                std.process.exit(1);
+            };
+            std.debug.print("{s}\n", .{json.items});
+            var client = std.http.Client{
+                .allocator = stdalloc,
+            };
+            _ = client.fetch(.{
+                .headers = .{
+                    .content_type = .{ .override = "application/json" },
+                },
+                .method = .POST,
+                .location = .{
+                    .url = "https://deep-translator-api.azurewebsites.net/api/google/",
+                },
+                .response_storage = .{
+                    .dynamic = &response,
+                },
+                .payload = json.items,
+            }) catch |err| {
+                std.debug.print("{any}", .{err});
+                std.process.exit(1);
+            };
+            defer client.deinit();
+            std.debug.print("{s}\n", .{response.items});
+            if (r.sendBody(response.items)) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
@@ -872,6 +933,4 @@ fn on_request(r: zap.Request) void {
             }
         }
     }
-
-    unreachable;
 }
