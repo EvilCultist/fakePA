@@ -49,7 +49,7 @@ const Lookup = struct {
     pub fn get(_: *Lookup, val: []const u8) []const u8 {
         var conn = pool.acquire() catch |err| {
             std.debug.print("error in getting new conn: {any}", .{err});
-            std.process.exit(1);
+            return;
         };
         defer conn.release();
 
@@ -61,7 +61,7 @@ const Lookup = struct {
             val,
         }) catch |err| {
             std.debug.print("pg error in checking auth: {any}", .{err});
-            std.process.exit(1);
+            return;
         });
         defer row.?.deinit() catch {};
 
@@ -99,15 +99,21 @@ const n_tokens = 0;
 
 // fn query_exit(err: ) void{
 //         std.debug.print("query error {any}", .{err});
-//         std.process.exit(1);
+//         return ;
 // }
 
 var pool: *pg.Pool = undefined;
 var Auth: ?zap.Auth.BearerMulti(Lookup) = null;
 
 pub fn main() !void {
-    const ollama_init_args: [2][]const u8 = .{ "ollama", "serve" };
+    const ollama_init_args: [2][]const u8 = .{
+        // const ollama_init_args: [3][]const u8 = .{
+        // "set OLLAMA_HOST 0.0.0.0",
+        "ollama",
+        "serve",
+    };
     var ollama = std.process.Child.init(&ollama_init_args, std.heap.page_allocator);
+    // ollama.addEnvVar
     try ollama.spawn();
     defer _ = ollama.kill() catch |err| {
         std.debug.print("error killing ollama {any}", .{err});
@@ -121,7 +127,7 @@ pub fn main() !void {
         .timeout = 2_592_000,
     } }) catch |err| {
         std.debug.print("pg error {any}", .{err});
-        std.process.exit(1);
+        return;
     };
     defer pool.deinit();
 
@@ -136,7 +142,7 @@ pub fn main() !void {
             \\ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
         , .{}) catch |err| {
             std.debug.print("query error added extension {any}", .{err});
-            std.process.exit(1);
+            return;
         };
     }
 
@@ -158,7 +164,7 @@ pub fn main() !void {
             \\ );
         , .{}) catch |err| {
             std.debug.print("query error creating table {any}", .{err});
-            std.process.exit(1);
+            return;
         };
     }
 
@@ -171,7 +177,7 @@ pub fn main() !void {
             \\ );
         , .{}) catch |err| {
             std.debug.print("query error creating table: {any}\n", .{err});
-            std.process.exit(1);
+            return;
         };
     }
 
@@ -180,7 +186,7 @@ pub fn main() !void {
             \\ DROP TABLE IF EXISTS public.tokens;
         , .{}) catch |err| {
             std.debug.print("query error dropping table: {any}\n", .{err});
-            std.process.exit(1);
+            return;
         };
 
         _ = pool.query(
@@ -190,7 +196,7 @@ pub fn main() !void {
             \\ );
         , .{}) catch |err| {
             std.debug.print("query error creating table: {any}\n", .{err});
-            std.process.exit(1);
+            return;
         };
     }
 
@@ -217,7 +223,7 @@ pub fn main() !void {
 fn pgPrintQuery(q: []const u8) void {
     var result = pool.query(q, .{}) catch |err| {
         std.debug.print("query error {any}", .{err});
-        std.process.exit(1);
+        return;
     };
     defer result.deinit();
 
@@ -268,7 +274,7 @@ fn on_request(r: zap.Request) void {
         //         return;
         //     } else |err| {
         //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-        //         std.process.exit(1);
+        //         return ;
         //     }
         // } else if (std.mem.eql(u8, the_path, "api/addUser")) {
         if (std.mem.eql(u8, the_path, "/api/addUser")) {
@@ -286,7 +292,7 @@ fn on_request(r: zap.Request) void {
                     {
                         var conn = pool.acquire() catch |err| {
                             std.debug.print("error in getting new conn: {any}", .{err});
-                            std.process.exit(1);
+                            return;
                         };
                         defer conn.release();
 
@@ -334,8 +340,8 @@ fn on_request(r: zap.Request) void {
                             val.email,
                         }) catch |err| {
                             std.debug.print("query error when adding user {any}", .{err});
-                            std.process.exit(1);
-                        }) orelse unreachable;
+                            return;
+                        }).?;
                         defer row.deinit() catch {};
                     }
 
@@ -359,7 +365,7 @@ fn on_request(r: zap.Request) void {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/api/auth")) {
             if (r.body) |the_body| {
@@ -377,7 +383,7 @@ fn on_request(r: zap.Request) void {
                     {
                         var conn = pool.acquire() catch |err| {
                             std.debug.print("error in getting new conn: {any}", .{err});
-                            std.process.exit(1);
+                            return;
                         };
                         defer conn.release();
 
@@ -390,8 +396,8 @@ fn on_request(r: zap.Request) void {
                             val.password,
                         }) catch |err| {
                             std.debug.print("pg error in checking auth: {any}", .{err});
-                            std.process.exit(1);
-                        }) orelse unreachable;
+                            return;
+                        }).?;
                         defer row.deinit() catch {};
 
                         name = row.get([]const u8, 0);
@@ -399,7 +405,7 @@ fn on_request(r: zap.Request) void {
                     {
                         var conn = pool.acquire() catch |err| {
                             std.debug.print("error in getting new conn: {any}", .{err});
-                            std.process.exit(1);
+                            return;
                         };
                         defer conn.release();
                         const token = makeAuthToken();
@@ -412,7 +418,7 @@ fn on_request(r: zap.Request) void {
                             token,
                         }) catch |err| {
                             std.debug.print("pg error in adding token to db: {any}", .{err});
-                            std.process.exit(1);
+                            return;
                         });
                         // \\ {
                         // \\ .access_token = token,
@@ -430,12 +436,12 @@ fn on_request(r: zap.Request) void {
                             \\ }}
                         , .{token}) catch |err| {
                             std.debug.print("error returning json: {any}", .{err});
-                            std.process.exit(1);
+                            return;
                         };
 
                         r.sendJson(json) catch |err| {
                             std.debug.print("error returning json: {any}", .{err});
-                            std.process.exit(1);
+                            return;
                         };
                     }
                     // _ = pool.query(
@@ -445,7 +451,7 @@ fn on_request(r: zap.Request) void {
                     //     val.password,
                     // }) catch |err| {
                     //     std.debug.print("query error when adding user {any}", .{err});
-                    //     std.process.exit(1);
+                    //     return ;
                     // };
                     // if (try state) {
                     // } else {
@@ -466,7 +472,7 @@ fn on_request(r: zap.Request) void {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/api/addMessage")) {
             if (std.json.parseFromSlice(
@@ -481,7 +487,7 @@ fn on_request(r: zap.Request) void {
                 // {
                 //     var conn = pool.acquire() catch |err| {
                 //         std.debug.print("error in getting new conn: {any}", .{err});
-                //         std.process.exit(1);
+                //         return ;
                 //     };
                 //     defer conn.release();
                 //
@@ -494,7 +500,7 @@ fn on_request(r: zap.Request) void {
                 //         val.password,
                 //     }) catch |err| {
                 //         std.debug.print("pg error in checking auth: {any}", .{err});
-                //         std.process.exit(1);
+                //         return ;
                 //     }) orelse unreachable;
                 //     defer row.deinit() catch {};
                 //
@@ -503,7 +509,7 @@ fn on_request(r: zap.Request) void {
                 {
                     var conn = pool.acquire() catch |err| {
                         std.debug.print("error in getting new conn: {any}", .{err});
-                        std.process.exit(1);
+                        return;
                     };
                     defer conn.release();
 
@@ -515,12 +521,12 @@ fn on_request(r: zap.Request) void {
                         val.content,
                     }) catch |err| {
                         std.debug.print("pg error in adding token to db: {any}", .{err});
-                        std.process.exit(1);
+                        return;
                     });
 
                     r.sendBody("Ok") catch |err| {
                         std.debug.print("error returning json: {any}", .{err});
-                        std.process.exit(1);
+                        return;
                     };
                 }
             } else |err| {
@@ -529,7 +535,7 @@ fn on_request(r: zap.Request) void {
         } else if (std.mem.eql(u8, the_path, "/api/getPatients")) {
             var conn = pool.acquire() catch |err| {
                 std.debug.print("error in getting new conn: {any}", .{err});
-                std.process.exit(1);
+                return;
             };
             defer conn.release();
 
@@ -538,8 +544,8 @@ fn on_request(r: zap.Request) void {
                 \\ FROM public.patients
             , .{}) catch |err| {
                 std.debug.print("pg error in checking auth: {any}", .{err});
-                std.process.exit(1);
-            }) orelse unreachable;
+                return;
+            }).?;
             defer row.deinit() catch {};
 
             // const medical_record_no: []const u8 = row.get([]const u8, 0);
@@ -593,7 +599,7 @@ fn on_request(r: zap.Request) void {
             //     allergies,
             // }) catch |err| {
             //     std.debug.print("error returning json: {any}", .{err});
-            //     std.process.exit(1);
+            //     return ;
             // };
 
             var json = std.ArrayList(u8).init(stdalloc);
@@ -659,7 +665,7 @@ fn on_request(r: zap.Request) void {
 
             r.sendJson(json.items) catch |err| {
                 std.debug.print("pg error in checking auth: {any}", .{err});
-                std.process.exit(1);
+                return;
             };
             return;
             // if (r.sendBody("")) {
@@ -667,7 +673,7 @@ fn on_request(r: zap.Request) void {
             //     return;
             // } else |err| {
             //     std.debug.print("could not serve req \n {any}\n", .{err});
-            //     std.process.exit(1);
+            //     return ;
             // }
         } else if (std.mem.eql(u8, the_path, "/api/translate")) {
             var json = std.ArrayList(u8).init(stdalloc);
@@ -676,16 +682,21 @@ fn on_request(r: zap.Request) void {
             defer response.deinit();
             _ = std.json.stringify(
                 .{
-                    .source = "auto",
-                    .target = "en",
-                    .text = r.body.?,
+                    .client = "gtx",
+                    .sl = "auto",
+                    .tl = "en",
+                    .dt = "t",
+                    .q = r.body.?,
+                    // .source = "auto",
+                    // .target = "en",
+                    // .text = r.body.?,
                     // .proxies = &[_]std.json.Value{},
                 },
                 .{},
                 json.writer(),
             ) catch |err| {
                 std.debug.print("{any}", .{err});
-                std.process.exit(1);
+                return;
             };
             std.debug.print("{s}\n", .{json.items});
             var client = std.http.Client{
@@ -697,7 +708,7 @@ fn on_request(r: zap.Request) void {
                 },
                 .method = .POST,
                 .location = .{
-                    .url = "https://deep-translator-api.azurewebsites.net/api/google/",
+                    .url = "https://translate.googleapis.com/translate_a/single",
                 },
                 .response_storage = .{
                     .dynamic = &response,
@@ -705,7 +716,7 @@ fn on_request(r: zap.Request) void {
                 .payload = json.items,
             }) catch |err| {
                 std.debug.print("{any}", .{err});
-                std.process.exit(1);
+                return;
             };
             defer client.deinit();
             std.debug.print("{s}\n", .{response.items});
@@ -713,84 +724,84 @@ fn on_request(r: zap.Request) void {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/")) {
             if (r.sendFile("swarup_pages/land.html")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/England.jpeg")) {
             if (r.sendFile("swarup_pages/England.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/arabia.jpeg")) {
             if (r.sendFile("swarup_pages/arabia.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/china.jpeg")) {
             if (r.sendFile("swarup_pages/china.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/france.jpeg")) {
             if (r.sendFile("swarup_pages/france.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/germany.jpeg")) {
             if (r.sendFile("swarup_pages/germany.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/india.jpeg")) {
             if (r.sendFile("swarup_pages/india.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/japan.jpeg")) {
             if (r.sendFile("swarup_pages/japan.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/spain.jpeg")) {
             if (r.sendFile("swarup_pages/spain.jpeg")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/login")) {
             if (r.sendFile("swarup_pages/login_page.html")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/sign_up")) {
             if (r.sendFile("swarup_pages/sign_up.html")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/chat")) {
             // if (auth == .AuthOK) {
@@ -802,126 +813,126 @@ fn on_request(r: zap.Request) void {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/terms")) {
             if (r.sendFile("swarup_pages/terms.html")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/vectors.txt")) {
             if (r.sendFile("swarup_pages/vectors.txt")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/words.txt")) {
             if (r.sendFile("swarup_pages/words.txt")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/admin_dashboard")) {
             if (r.sendFile("swarup_pages/admin_dashboard.html")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/doctor_dashboard")) {
             if (r.sendFile("swarup_pages/doctor_dashboard.html")) {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/logo.png")) {
             if (r.sendFile("web/logo.png")) {
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         } else if (std.mem.eql(u8, the_path, "/favicon.ico")) {
             if (r.sendFile("web/logo.png")) {
                 return;
             } else |err| {
                 std.log.err("oh nards, some error happened\n{any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
             // } else if (std.mem.eql(u8, the_path, "/doctor_dashboard")) {
             //     if (r.sendFile("web/doctor_dashboard.html")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/doc")) {
             //     if (r.sendFile("web/index.html")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/terms")) {
             //     if (r.sendFile("web/terms.html")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/chatbot_interface")) {
             //     if (r.sendFile("web/chatbot_interface.html")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/login")) {
             //     if (r.sendFile("web/login_signup.html")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/kanishk-testing")) {
             //     if (r.sendFile("web/fakenlp.html")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/fakenlp.js")) {
             //     if (r.sendFile("web/fakenlp.js")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/vocab.txt")) {
             //     if (r.sendFile("web/vocab.txt")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/words.txt")) {
             //     if (r.sendFile("web/words.txt")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
             // } else if (std.mem.eql(u8, the_path, "/vectors.txt")) {
             //     if (r.sendFile("web/vectors.txt")) {
             //         return;
             //     } else |err| {
             //         std.log.err("oh nards, some error happened\n{any}\n", .{err});
-            //         std.process.exit(1);
+            //         return ;
             //     }
         } else {
             if (r.sendFile("web/404.html")) {
@@ -929,7 +940,7 @@ fn on_request(r: zap.Request) void {
                 return;
             } else |err| {
                 std.debug.print("could not serve req \n {any}\n", .{err});
-                std.process.exit(1);
+                return;
             }
         }
     }
